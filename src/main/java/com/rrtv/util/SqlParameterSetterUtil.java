@@ -16,6 +16,13 @@ public class SqlParameterSetterUtil {
 
     private static final Log logger = LogFactory.getLog(SqlParameterSetterUtil.class);
 
+    private final static String regex = "'|and|exec|execute|insert|select|delete|update|count|drop|*|%|chr|mid|master|truncate|" +
+            "char|declare|sitename|net user|xp_cmdshell|;|or|-|+|,|like'|and|exec|execute|insert|create|drop|" +
+            "table|from|grant|use|group_concat|column_name|" +
+            "information_schema.columns|table_schema|union|where|select|delete|update|order|by|count|*|" +
+            "chr|mid|master|truncate|char|declare|or|;|-|--|+|,|like|//|/|%|#";
+
+
     /**
      *  设置参数 支持两种方式设置 一种是 ? 占位符，另一种是 :name 这种形式
      *
@@ -108,7 +115,8 @@ public class SqlParameterSetterUtil {
         if(objParam == null){
             sb.append("\\'null\\'");
         } else if(objParam instanceof String){
-           sb.append("\\'").append(objParam).append("\\'");
+            String param = String.class.cast(objParam);
+           sb.append("\\'").append(filter(param)).append("\\'");
         } else if(isNumberType(objParam)){
             sb.append(objParam);
         }
@@ -148,6 +156,16 @@ public class SqlParameterSetterUtil {
                 || Boolean.class.isInstance(var) || boolean.class.isInstance(var)
                 || Character.class.isInstance(var) || char.class.isInstance(var)
                 || isNumberType(var);
+    }
+
+
+    /**
+     *  SQL 防止注入
+     * @param param
+     * @return
+     */
+    public static String filter(String param) {
+        return param.replaceAll("(?i)" + regex, ""); // (?i)不区分大小写替换
     }
 
     public static void main(String[] args) {
