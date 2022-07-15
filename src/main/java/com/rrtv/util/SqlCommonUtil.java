@@ -1,5 +1,6 @@
 package com.rrtv.util;
 
+import com.rrtv.exception.SqlParserException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -14,6 +15,7 @@ import net.sf.jsqlparser.statement.execute.Execute;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.merge.Merge;
 import net.sf.jsqlparser.statement.replace.Replace;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.truncate.Truncate;
 import net.sf.jsqlparser.statement.update.Update;
@@ -77,6 +79,25 @@ public class SqlCommonUtil {
         }
     }
 
+    /**
+     *  初步解析 select SQL
+     * @param sql
+     * @return
+     */
+    public static PlainSelect parserSelectSql(String sql) {
+
+        SqlSupportedSyntaxCheckUtil.checkSqlType(sql, SqlType.SELECT);
+
+        Select select;
+        try {
+            select = (Select) CCJSqlParserUtil.parse(sql);
+        } catch (JSQLParserException ex) {
+            throw new SqlParserException("sql解析失败：", ex);
+        }
+
+        PlainSelect plain = (PlainSelect) select.getSelectBody();
+        return plain;
+    }
 
     /**
      * 处理表达式的 右边值
