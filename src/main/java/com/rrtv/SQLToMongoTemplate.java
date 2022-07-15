@@ -9,15 +9,17 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.lang.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SQLToMongoTemplate {
 
     private MongoTemplate mongoTemplate;
 
-    public SQLToMongoTemplate(MongoTemplate mongoTemplate){
+    private SelectSQLTypeParser selectSQLTypeParser;
+
+    public SQLToMongoTemplate(MongoTemplate mongoTemplate, SelectSQLTypeParser selectSQLTypeParser){
         this.mongoTemplate = mongoTemplate;
+        this.selectSQLTypeParser = selectSQLTypeParser;
     }
 
 
@@ -27,7 +29,7 @@ public class SQLToMongoTemplate {
         // 设置参数
         sql = SqlParameterSetterUtil.parameterSetter(sql, parameters);
         // 解析 SQL 并返回封装 Mongo 的API
-        MongoParserResult result = SelectSQLTypeParser.parser(sql);
+        MongoParserResult result = selectSQLTypeParser.parser(sql);
         // 使用 MongoTemplate 的 aggregate 聚合查询 API 获取结果
         AggregationResults<T> results = mongoTemplate.aggregate(result.getAggregation(),
                 result.getCollectionName(), returnType);
@@ -38,7 +40,7 @@ public class SQLToMongoTemplate {
     public <T> List<T> selectList(String sql, Class<T> returnType, @Nullable Object... parameters) {
         SqlSupportedSyntaxCheckUtil.checkSqlType(sql, SqlCommonUtil.SqlType.SELECT);
         sql = SqlParameterSetterUtil.parameterSetter(sql, parameters);
-        MongoParserResult result = SelectSQLTypeParser.parser(sql);
+        MongoParserResult result = selectSQLTypeParser.parser(sql);
         AggregationResults<T> results = mongoTemplate.aggregate(result.getAggregation(), result.getCollectionName(), returnType);
         return results.getMappedResults();
     }

@@ -6,11 +6,10 @@ import com.rrtv.common.MongoParserResult;
 import com.rrtv.exception.SqlParserException;
 import com.rrtv.parser.data.*;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.FromItem;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -34,7 +33,7 @@ public class SelectSQLTypeParser {
     private static Map<String, MongoParserResult> parserCache = new ConcurrentHashMap<>();
 
 
-    public static MongoParserResult parser(String sql) {
+    public MongoParserResult parser(String sql) {
 
         MongoParserResult mongoParserResult = parserCache.get(sql);
         if (mongoParserResult != null) {
@@ -56,25 +55,26 @@ public class SelectSQLTypeParser {
         String majorTableAlias = majorTable.getAlias() == null ? "" : majorTable.getAlias().getName();
 
         // 解析 JOIN 表
-        List<LookUpData> joinParser = JoinSQLParser.parser(plain.getJoins(), majorTableAlias);
+        List<LookUpData> joinParser = parserJoin(plain.getJoins(), majorTableAlias);
 
         // 解析 投影字段
-        List<ProjectData> projectData = ProjectSQLParser.parser(plain.getSelectItems());
+        List<ProjectData> projectData = parerProject(plain.getSelectItems());
+
 
         // 解析 条件 匹配
-        List<MatchData> matchData = WhereSQLParser.parser(plain.getWhere());
+        List<MatchData> matchData = parerMatchData(plain.getWhere());
 
         // 解析 分组
-        List<GroupData> groupData = GroupSQLParser.parser(plain.getGroupBy());
+        List<GroupData> groupData = parserGroupData(plain.getGroupBy());
 
         // 解析 having 过滤
-        List<MatchData> havingData = HavingSQLParser.parser(plain.getHaving());
+        List<MatchData> havingData = parserHavingData(plain.getHaving());
 
         // 解析 排序
-        List<SortData> sortData = OrderSQLParser.parser(plain.getOrderByElements());
+        List<SortData> sortData = parserOrderData(plain.getOrderByElements());
 
         // 解析 分页 limit
-        LimitData limitData = LimitSQLParser.parser(plain.getLimit());
+        LimitData limitData = parerLimitData(plain.getLimit());
 
         // ====== 下面开始 分析 各个部分 构建 Mongo API ============
         List<AggregationOperation> operations = new ArrayList<>();
@@ -142,6 +142,70 @@ public class SelectSQLTypeParser {
         mongoParserResult = new MongoParserResult(aggregation, table.getName());
         //  parserCache.put(sql, mongoParserResult);
         return mongoParserResult;
+    }
+
+    /**
+     *  解析 limit 使用着可以通过重写此方法来扩展
+     * @param limit
+     * @return
+     */
+    public LimitData parerLimitData(Limit limit) {
+        return LimitSQLParser.parser(limit);
+    }
+
+    /**
+     *  解析 排序 使用着可以通过重写此方法来扩展
+     * @param orderByElements
+     * @return
+     */
+    public List<SortData> parserOrderData(List<OrderByElement> orderByElements) {
+        return OrderSQLParser.parser(orderByElements);
+    }
+
+    /**
+     *  解析 过滤 使用着可以通过重写此方法来扩展
+     * @param having
+     * @return
+     */
+    public List<MatchData> parserHavingData(Expression having) {
+        return HavingSQLParser.parser(having);
+    }
+
+    /**
+     *  解析 分组 使用着可以通过重写此方法来扩展
+     * @param element
+     * @return
+     */
+    public List<GroupData> parserGroupData(GroupByElement element) {
+        return GroupSQLParser.parser(element);
+    }
+
+    /**
+     *  解析 过滤条件（where） 使用着可以通过重写此方法来扩展
+     * @param where
+     * @return
+     */
+    public List<MatchData> parerMatchData(Expression where) {
+        return WhereSQLParser.parser(where);
+    }
+
+    /**
+     *  解析 投影（字段） 使用着可以通过重写此方法来扩展
+     * @param selectItems
+     * @return
+     */
+    public List<ProjectData> parerProject(List<SelectItem> selectItems) {
+        return ProjectSQLParser.parser(selectItems);
+    }
+
+    /**
+     *  解析 JOIN 使用着可以通过重写此方法来扩展
+     * @param joins
+     * @param majorTableAlias
+     * @return
+     */
+    public List<LookUpData> parserJoin(List<Join> joins, String majorTableAlias ) {
+        return JoinSQLParser.parser(joins, majorTableAlias);
     }
 
     /**

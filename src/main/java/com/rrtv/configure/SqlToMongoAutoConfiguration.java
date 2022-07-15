@@ -3,6 +3,7 @@ package com.rrtv.configure;
 import com.rrtv.SQLToMongoTemplate;
 import com.rrtv.orm.SqlSession;
 import com.rrtv.orm.SqlSessionBuilder;
+import com.rrtv.parser.SelectSQLTypeParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -19,11 +20,16 @@ public class SqlToMongoAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-  //  @ConditionalOnBean({ MongoTemplate.class })
+    public SelectSQLTypeParser selectSQLTypeParser(){
+        return new SelectSQLTypeParser();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     @DependsOn("mongoTemplate")
-    public SQLToMongoTemplate sqlToMongoTemplate(@Autowired(required = false)
-                                                 MongoTemplate mongoTemplate){
-        return new SQLToMongoTemplate(mongoTemplate);
+    public SQLToMongoTemplate sqlToMongoTemplate(@Autowired(required = false) MongoTemplate mongoTemplate,
+                                                 @Autowired SelectSQLTypeParser selectSQLTypeParser){
+        return new SQLToMongoTemplate(mongoTemplate, selectSQLTypeParser);
     }
 
     @Bean
