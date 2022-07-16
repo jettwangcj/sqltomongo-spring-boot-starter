@@ -3,14 +3,11 @@ package com.rrtv.parser;
 import com.alibaba.fastjson.JSON;
 import com.rrtv.common.AggregationFunction;
 import com.rrtv.common.MongoParserResult;
-import com.rrtv.exception.SqlParserException;
 import com.rrtv.parser.data.*;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.rrtv.util.SqlCommonUtil;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -41,14 +38,7 @@ public class SelectSQLTypeParser {
             return mongoParserResult;
         }
 
-        Select select;
-        try {
-            select = (Select) CCJSqlParserUtil.parse(sql);
-        } catch (JSQLParserException ex) {
-            throw new SqlParserException("sql解析失败：", ex);
-        }
-
-        PlainSelect plain = (PlainSelect) select.getSelectBody();
+        PlainSelect plain = SqlCommonUtil.parserSelectSql(sql);
 
         // 解析 主表
         FromItem fromItem = plain.getFromItem();
@@ -140,7 +130,7 @@ public class SelectSQLTypeParser {
         }
         Table table = Table.class.cast(plain.getFromItem());
         mongoParserResult = new MongoParserResult(aggregation, table.getName());
-        //  parserCache.put(sql, mongoParserResult);
+        parserCache.put(sql, mongoParserResult);
         return mongoParserResult;
     }
 
