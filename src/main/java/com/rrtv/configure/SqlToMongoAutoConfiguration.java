@@ -1,6 +1,7 @@
 package com.rrtv.configure;
 
 import com.rrtv.SQLToMongoTemplate;
+import com.rrtv.cache.MongoTemplateProxy;
 import com.rrtv.orm.SqlSession;
 import com.rrtv.orm.SqlSessionBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,7 @@ public class SqlToMongoAutoConfiguration {
     @ConditionalOnMissingBean
   //  @ConditionalOnBean({ MongoTemplate.class })
     @DependsOn("mongoTemplate")
-    public SQLToMongoTemplate sqlToMongoTemplate(@Autowired(required = false)
-                                                 MongoTemplate mongoTemplate){
+    public SQLToMongoTemplate sqlToMongoTemplate(@Autowired(required = false) MongoTemplateProxy mongoTemplate){
         return new SQLToMongoTemplate(mongoTemplate);
     }
 

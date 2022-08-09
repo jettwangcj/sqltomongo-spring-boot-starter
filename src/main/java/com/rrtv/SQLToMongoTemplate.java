@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.lang.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SQLToMongoTemplate {
