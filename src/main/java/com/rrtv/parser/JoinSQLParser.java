@@ -18,7 +18,7 @@ import java.util.List;
 
 public class JoinSQLParser {
 
-    public static List<LookUpData> parser(List<Join> joins, String majorTableAlias ) {
+    public List<LookUpData> parser(List<Join> joins, String majorTableAlias ) {
 
         List<LookUpData> lookUpData = new ArrayList<>();
 

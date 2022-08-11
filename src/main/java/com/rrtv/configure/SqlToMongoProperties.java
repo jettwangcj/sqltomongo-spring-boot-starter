@@ -2,7 +2,6 @@ package com.rrtv.configure;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * @Classname SqlToMongoProperties
@@ -12,10 +11,12 @@ import org.springframework.stereotype.Component;
  */
 
 @Data
-@Component
 @ConfigurationProperties(prefix = "sql-to-mongo")
 public class SqlToMongoProperties {
 
+    private String packageSearchPath;
+
+    private boolean cacheEnabled;
 
 
 }

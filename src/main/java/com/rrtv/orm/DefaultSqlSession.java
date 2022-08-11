@@ -1,8 +1,7 @@
 package com.rrtv.orm;
 
-import com.rrtv.SQLToMongoTemplate;
+import com.rrtv.executor.Executor;
 import com.rrtv.util.SqlCommonUtil;
-import net.sf.jsqlparser.JSQLParserException;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
@@ -11,15 +10,17 @@ import java.util.Map;
 
 public class DefaultSqlSession implements SqlSession {
 
-    private SQLToMongoTemplate sqlToMongoTemplate;
 
-    private Configuration configuration;
+    private final Configuration configuration;
+
+    private final Executor executor;
 
     private Map<String, XNode> mapperElement;
 
-    public DefaultSqlSession(SQLToMongoTemplate sqlToMongoTemplate, Configuration configuration) {
-        this.sqlToMongoTemplate = sqlToMongoTemplate;
+    public DefaultSqlSession(Configuration configuration, Executor executor) {
         this.configuration = configuration;
+        this.executor = executor;
+        this.mapperElement = configuration.getMapperElement();
     }
 
     @Override
@@ -53,14 +54,14 @@ public class DefaultSqlSession implements SqlSession {
     @Override
     public <T> T selectOne(String statement, Class<T> returnType, @Nullable Object... parameters) {
         XNode xNode = mapperElement.get(statement);
-        return sqlToMongoTemplate.selectOne(xNode.getSql(), returnType, parameters);
+        return executor.selectOne(xNode.getSql(), returnType, parameters);
     }
 
 
     @Override
     public <T> List<T> selectList(String statement, Class<T> returnType, @Nullable Object... parameters) {
         XNode xNode = mapperElement.get(statement);
-        return sqlToMongoTemplate.selectList(xNode.getSql(), returnType, parameters);
+        return executor.selectList(xNode.getSql(), returnType, parameters);
     }
 
 

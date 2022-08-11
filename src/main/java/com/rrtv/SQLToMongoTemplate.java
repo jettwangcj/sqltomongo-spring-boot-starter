@@ -1,26 +1,26 @@
 package com.rrtv;
 
-import com.rrtv.executor.Executor;
+import com.rrtv.orm.SqlSession;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
 
 public class SQLToMongoTemplate {
 
-    private Executor executor;
+    private SqlSession sqlSession;
 
-    public SQLToMongoTemplate(Executor executor){
-        this.executor = executor;
+    public SQLToMongoTemplate(SqlSession sqlSession){
+        this.sqlSession = sqlSession;
     }
 
 
     public <T> T selectOne(String sql, Class<T> returnType, @Nullable Object... parameters) {
-        return executor.selectOne(sql, returnType, parameters);
+        return sqlSession.selectOne(sql, returnType, parameters);
      }
 
 
     public <T> List<T> selectList(String sql, Class<T> returnType, @Nullable Object... parameters) {
-      return executor.selectList(sql, returnType, parameters);
+      return sqlSession.selectList(sql, returnType, parameters);
     }
 
 

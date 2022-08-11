@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.rrtv.common.AggregationFunction;
 import com.rrtv.common.MongoParserResult;
 import com.rrtv.exception.SqlParserException;
+import com.rrtv.orm.Configuration;
 import com.rrtv.parser.data.*;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -29,12 +30,18 @@ import java.util.stream.Collectors;
 
 public class SelectSQLTypeParser {
 
+    private Configuration configuration;
+
     private static final Log logger = LogFactory.getLog(SelectSQLTypeParser.class);
 
     private static Map<String, MongoParserResult> parserCache = new ConcurrentHashMap<>();
 
 
-    public static MongoParserResult parser(String sql) {
+    public SelectSQLTypeParser(Configuration configuration){
+        this.configuration = configuration;
+    }
+
+    public MongoParserResult parser(String sql) {
 
         MongoParserResult mongoParserResult = parserCache.get(sql);
         if (mongoParserResult != null) {
@@ -56,7 +63,7 @@ public class SelectSQLTypeParser {
         String majorTableAlias = majorTable.getAlias() == null ? "" : majorTable.getAlias().getName();
 
         // 解析 JOIN 表
-        List<LookUpData> joinParser = JoinSQLParser.parser(plain.getJoins(), majorTableAlias);
+        List<LookUpData> joinParser = configuration.newJoinSQLParser().parser(plain.getJoins(), majorTableAlias);
 
         // 解析 投影字段
         List<ProjectData> projectData = ProjectSQLParser.parser(plain.getSelectItems());
