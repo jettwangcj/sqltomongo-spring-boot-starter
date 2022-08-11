@@ -2,6 +2,7 @@ package com.rrtv.configure;
 
 import com.rrtv.annotation.EnableSqlToMongoMapper;
 import com.rrtv.annotation.SqlToMongoMapper;
+import com.rrtv.binding.SqlToMongoMapperFactoryBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -17,14 +20,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SqlToMongoRegistrar implements ImportBeanDefinitionRegistrar, ResourceLoaderAware, EnvironmentAware {
 
@@ -32,8 +32,7 @@ public class SqlToMongoRegistrar implements ImportBeanDefinitionRegistrar, Resou
 
     private Environment environment;
 
-    SqlToMongoRegistrar() {
-    }
+    SqlToMongoRegistrar() {}
 
     @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {

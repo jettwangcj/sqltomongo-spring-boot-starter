@@ -26,7 +26,11 @@ public class SqlSessionBuilder {
             Document document = new SAXReader().read(new InputSource(new InputStreamReader(resource.getInputStream())));
             list.add(document.getRootElement());
         }
-        return new DefaultSqlSession(sqlToMongoTemplate, DomParser.parser(list));
+
+        Configuration configuration = new Configuration();
+        configuration.setMapperElement(DomParser.parser(list));
+
+        return new DefaultSqlSession(sqlToMongoTemplate, configuration);
     }
 
 }

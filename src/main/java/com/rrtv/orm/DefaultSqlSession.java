@@ -13,11 +13,23 @@ public class DefaultSqlSession implements SqlSession {
 
     private SQLToMongoTemplate sqlToMongoTemplate;
 
+    private Configuration configuration;
+
     private Map<String, XNode> mapperElement;
 
-    public DefaultSqlSession(SQLToMongoTemplate sqlToMongoTemplate, Map<String, XNode> mapperElement) {
+    public DefaultSqlSession(SQLToMongoTemplate sqlToMongoTemplate, Configuration configuration) {
         this.sqlToMongoTemplate = sqlToMongoTemplate;
-        this.mapperElement = mapperElement;
+        this.configuration = configuration;
+    }
+
+    @Override
+    public Configuration getConfiguration() {
+        return this.configuration;
+    }
+
+    @Override
+    public <T> T getMapper(Class<T> type) {
+        return null;
     }
 
     @Override

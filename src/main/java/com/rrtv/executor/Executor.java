@@ -12,8 +12,8 @@ import java.util.List;
  */
 public interface Executor {
 
-    <T> T selectOne(String statement, Class<T> returnType, @Nullable Object... parameters);
+    <T> T selectOne(String sql, Class<T> returnType, @Nullable Object... parameters);
 
-    <T> List<T> selectList(String statement, Class<T> returnType, @Nullable Object... parameters);
+    <T> List<T> selectList(String sql, Class<T> returnType, @Nullable Object... parameters);
 
 }

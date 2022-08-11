@@ -4,7 +4,7 @@ import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
@@ -15,7 +15,7 @@ public class MongoTemplateProxy extends MongoTemplate implements ApplicationEven
 
     private ApplicationEventPublisher applicationEventPublisher;
 
-    public MongoTemplateProxy(MongoDbFactory mongoDbFactory) {
+    public MongoTemplateProxy(MongoDatabaseFactory mongoDbFactory) {
         super(mongoDbFactory);
     }
 
@@ -23,9 +23,9 @@ public class MongoTemplateProxy extends MongoTemplate implements ApplicationEven
     protected UpdateResult doUpdate(String collectionName, Query query, UpdateDefinition update,
                                     @Nullable Class<?> entityClass, boolean upsert, boolean multi)  {
         UpdateResult updateResult = super.doUpdate(collectionName, query, update, entityClass, upsert, multi);
-
+/*
         // 发布清除缓存事件
-        applicationEventPublisher.publishEvent(new ClearCacheEvent(new Object()));
+        applicationEventPublisher.publishEvent(new ClearCacheEvent(new Object()));*/
 
         return updateResult;
     }
