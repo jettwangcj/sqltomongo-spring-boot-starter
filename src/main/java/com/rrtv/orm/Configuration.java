@@ -90,17 +90,47 @@ public class Configuration {
         return havingSQLParser;
     }
 
+    /**
+     *  Mongo 投影解析器 通过责任链包装，扩展可以在拦截器中做
+     * @return
+     */
     public ProjectSQLParser newProjectSQLParser(){
-        return null;
+        ProjectSQLParser projectSQLParser = new ProjectSQLParser();
+        projectSQLParser = (ProjectSQLParser)interceptorChain.pluginAll(projectSQLParser);
+        return projectSQLParser;
     }
 
+    /**
+     *  排序 解析器 通过责任链包装，扩展可以在拦截器中做
+     * @return
+     */
     public OrderSQLParser newOrderSQLParser(){
-        return null;
+        OrderSQLParser orderSQLParser = new OrderSQLParser();
+        orderSQLParser = (OrderSQLParser)interceptorChain.pluginAll(orderSQLParser);
+        return orderSQLParser;
     }
 
+    /**
+     *  Limit 解析器 通过责任链包装，扩展可以在拦截器中做
+     * @return
+     */
     public LimitSQLParser newLimitSQLParser(){
-        return null;
+        LimitSQLParser limitSQLParser = new LimitSQLParser();
+        limitSQLParser = (LimitSQLParser)interceptorChain.pluginAll(limitSQLParser);
+        return limitSQLParser;
     }
+
+    /**
+     *  where 条件解析器 通过责任链包装，扩展可以在拦截器中做
+     * @return
+     */
+    public WhereSQLParser newWhereSQLParser(){
+        WhereSQLParser whereSQLParser = new WhereSQLParser();
+        whereSQLParser = (WhereSQLParser)interceptorChain.pluginAll(whereSQLParser);
+        return whereSQLParser;
+    }
+
+
 
     /**
      *  添加拦截器

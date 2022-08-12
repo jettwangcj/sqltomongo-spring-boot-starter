@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class HavingSQLParser {
 
-    public static List<MatchData> parser(Expression having) {
+    public List<MatchData> parser(Expression having) {
         if (ObjectUtils.isNotEmpty(having)) {
             MatchExpressionVisitorAdapter adapter = new MatchExpressionVisitorAdapter(MatchExpressionVisitorAdapter.ParserPart.having);
             having.accept(adapter);

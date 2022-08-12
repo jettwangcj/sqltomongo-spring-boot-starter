@@ -13,7 +13,7 @@ public class LimitSQLParser {
 
     private static final Log logger = LogFactory.getLog(LimitSQLParser.class);
 
-    public static LimitData parser(Limit limit) {
+    public LimitData parser(Limit limit) {
         if (Objects.nonNull(limit)) {
             Expression offset = limit.getOffset();
             Expression rowCount = limit.getRowCount();

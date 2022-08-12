@@ -12,7 +12,7 @@ import java.util.List;
 
 public class OrderSQLParser {
 
-    public static List<SortData> parser(List<OrderByElement> orderByElements) {
+    public List<SortData> parser(List<OrderByElement> orderByElements) {
         List<SortData> sortData = new ArrayList<>();
         if (!CollectionUtils.isEmpty(orderByElements)) {
             for (OrderByElement orderByElement : orderByElements) {

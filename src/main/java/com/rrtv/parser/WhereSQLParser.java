@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class WhereSQLParser {
 
-    public static List<MatchData> parser(Expression where) {
+    public List<MatchData> parser(Expression where) {
         if (ObjectUtils.isNotEmpty(where)) {
             MatchExpressionVisitorAdapter adapter =
                     new MatchExpressionVisitorAdapter(MatchExpressionVisitorAdapter.ParserPart.where);

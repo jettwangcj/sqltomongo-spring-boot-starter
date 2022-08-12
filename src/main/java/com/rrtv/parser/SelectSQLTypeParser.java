@@ -66,22 +66,22 @@ public class SelectSQLTypeParser {
         List<LookUpData> joinParser = configuration.newJoinSQLParser().parser(plain.getJoins(), majorTableAlias);
 
         // 解析 投影字段
-        List<ProjectData> projectData = ProjectSQLParser.parser(plain.getSelectItems());
+        List<ProjectData> projectData = configuration.newProjectSQLParser().parser(plain.getSelectItems());
 
         // 解析 条件 匹配
-        List<MatchData> matchData = WhereSQLParser.parser(plain.getWhere());
+        List<MatchData> matchData = configuration.newWhereSQLParser().parser(plain.getWhere());
 
         // 解析 分组
-        List<GroupData> groupData = GroupSQLParser.parser(plain.getGroupBy());
+        List<GroupData> groupData = configuration.newGroupSQLParser().parser(plain.getGroupBy());
 
         // 解析 having 过滤
-        List<MatchData> havingData = HavingSQLParser.parser(plain.getHaving());
+        List<MatchData> havingData = configuration.newHavingSQLParser().parser(plain.getHaving());
 
         // 解析 排序
-        List<SortData> sortData = OrderSQLParser.parser(plain.getOrderByElements());
+        List<SortData> sortData = configuration.newOrderSQLParser().parser(plain.getOrderByElements());
 
         // 解析 分页 limit
-        LimitData limitData = LimitSQLParser.parser(plain.getLimit());
+        LimitData limitData = configuration.newLimitSQLParser().parser(plain.getLimit());
 
         // ====== 下面开始 分析 各个部分 构建 Mongo API ============
         List<AggregationOperation> operations = new ArrayList<>();
@@ -116,7 +116,6 @@ public class SelectSQLTypeParser {
         if (!CollectionUtils.isEmpty(havingData)) {
             operations.addAll(analysisMatch(majorTableAlias, havingData, lookUpDataMap));
         }
-
 
         // 不知道为啥 mongo 里面投影有个问题 只有一个 group by 的话 ，对这个 group by 字段投影会失败 TODO 这里做特殊处理
         if (!CollectionUtils.isEmpty(groupData) && groupData.size() == 1) {

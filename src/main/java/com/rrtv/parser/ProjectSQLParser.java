@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ProjectSQLParser {
 
-    public static List<ProjectData> parser(List<SelectItem> selectItems) {
+    public List<ProjectData> parser(List<SelectItem> selectItems) {
 
         List<ProjectData> projects = new ArrayList<>();
         for (SelectItem selectItem : selectItems) {

@@ -14,21 +14,7 @@ import java.util.Objects;
 
 public class GroupSQLParser {
 
-    public static void main(String[] args) {
-        try {
-
-            String sql = "select b.title, b.remark from bookList b group by b.id,c.id";
-            Select select = (Select) CCJSqlParserUtil.parse(sql);
-            PlainSelect plain = (PlainSelect) select.getSelectBody();
-            parser(plain.getGroupBy());
-
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-    }
-
-    public static List<GroupData> parser(GroupByElement element) {
+    public List<GroupData> parser(GroupByElement element) {
         List<GroupData> groupData = new ArrayList<>();
         if ( Objects.nonNull(element)) {
             List<Expression> groupByExpressions = element.getGroupByExpressions();
