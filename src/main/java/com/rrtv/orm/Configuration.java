@@ -2,6 +2,7 @@ package com.rrtv.orm;
 
 import com.rrtv.binding.MapperAnnotationBuilder;
 import com.rrtv.binding.MapperProxyFactory;
+import com.rrtv.common.ParserPartTypeEnum;
 import com.rrtv.exception.BindingException;
 import com.rrtv.executor.CachingExecutor;
 import com.rrtv.executor.DefaultExecutor;
@@ -23,28 +24,29 @@ import java.util.Map;
 public class Configuration {
 
     /**
-     *  缓存标志
+     * 缓存标志
      */
     private final boolean cacheEnabled = false;
 
     /**
-     *  Mapper 代理
+     * Mapper 代理
      */
     private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();
 
     /**
-     *  接口SQL映射
+     * 接口SQL映射
      */
     private Map<String, XNode> mapperElement;
 
     /**
-     *  拦截器链条
+     * 拦截器链条
      */
     private final InterceptorChain interceptorChain = new InterceptorChain();
 
     /**
-     *  创建执行器 缓存执行器 和 默认执行器
-     *  并对执行器增加拦截器处理
+     * 创建执行器 缓存执行器 和 默认执行器
+     * 并对执行器增加拦截器处理
+     *
      * @param mongoTemplate
      * @param selectSQLTypeParser
      * @return
@@ -60,80 +62,97 @@ public class Configuration {
         return executor;
     }
 
-    /**
-     *  Join 解析器 通过责任链包装，扩展可以在拦截器中做
-     * @return
-     */
-    public JoinSQLParser newJoinSQLParser(){
-        JoinSQLParser joinSQLParser = new JoinSQLParser();
-        joinSQLParser = (JoinSQLParser) interceptorChain.pluginAll(joinSQLParser);
-       return joinSQLParser;
+
+    public PartSQLParser newPartSQLParser(ParserPartTypeEnum typeEnum){
+        PartSQLParser partSQLParser = null;
+        if(typeEnum == ParserPartTypeEnum.GROUP){
+            partSQLParser = new GroupSQLParser();
+        }
+
+        return partSQLParser;
     }
 
     /**
-     *  分组SQL解析器 通过责任链包装，扩展可以在拦截器中做
+     * Join 解析器 通过责任链包装，扩展可以在拦截器中做
+     *
      * @return
      */
-    public GroupSQLParser newGroupSQLParser(){
+    public JoinSQLParser newJoinSQLParser() {
+        JoinSQLParser joinSQLParser = new JoinSQLParser();
+        joinSQLParser = (JoinSQLParser) interceptorChain.pluginAll(joinSQLParser);
+        return joinSQLParser;
+    }
+
+    /**
+     * 分组SQL解析器 通过责任链包装，扩展可以在拦截器中做
+     *
+     * @return
+     */
+    public GroupSQLParser newGroupSQLParser() {
         GroupSQLParser groupSQLParser = new GroupSQLParser();
         groupSQLParser = (GroupSQLParser) interceptorChain.pluginAll(groupSQLParser);
         return groupSQLParser;
     }
 
     /**
-     *  Having SQL解析器 通过责任链包装，扩展可以在拦截器中做
+     * Having SQL解析器 通过责任链包装，扩展可以在拦截器中做
+     *
      * @return
      */
-    public HavingSQLParser newHavingSQLParser(){
+    public HavingSQLParser newHavingSQLParser() {
         HavingSQLParser havingSQLParser = new HavingSQLParser();
-        havingSQLParser = (HavingSQLParser)interceptorChain.pluginAll(havingSQLParser);
+        havingSQLParser = (HavingSQLParser) interceptorChain.pluginAll(havingSQLParser);
         return havingSQLParser;
     }
 
     /**
-     *  Mongo 投影解析器 通过责任链包装，扩展可以在拦截器中做
+     * Mongo 投影解析器 通过责任链包装，扩展可以在拦截器中做
+     *
      * @return
      */
-    public ProjectSQLParser newProjectSQLParser(){
+    public ProjectSQLParser newProjectSQLParser() {
         ProjectSQLParser projectSQLParser = new ProjectSQLParser();
-        projectSQLParser = (ProjectSQLParser)interceptorChain.pluginAll(projectSQLParser);
+        projectSQLParser = (ProjectSQLParser) interceptorChain.pluginAll(projectSQLParser);
         return projectSQLParser;
     }
 
     /**
-     *  排序 解析器 通过责任链包装，扩展可以在拦截器中做
+     * 排序 解析器 通过责任链包装，扩展可以在拦截器中做
+     *
      * @return
      */
-    public OrderSQLParser newOrderSQLParser(){
+    public OrderSQLParser newOrderSQLParser() {
         OrderSQLParser orderSQLParser = new OrderSQLParser();
-        orderSQLParser = (OrderSQLParser)interceptorChain.pluginAll(orderSQLParser);
+        orderSQLParser = (OrderSQLParser) interceptorChain.pluginAll(orderSQLParser);
         return orderSQLParser;
     }
 
     /**
-     *  Limit 解析器 通过责任链包装，扩展可以在拦截器中做
+     * Limit 解析器 通过责任链包装，扩展可以在拦截器中做
+     *
      * @return
      */
-    public LimitSQLParser newLimitSQLParser(){
+    public LimitSQLParser newLimitSQLParser() {
         LimitSQLParser limitSQLParser = new LimitSQLParser();
-        limitSQLParser = (LimitSQLParser)interceptorChain.pluginAll(limitSQLParser);
+        limitSQLParser = (LimitSQLParser) interceptorChain.pluginAll(limitSQLParser);
         return limitSQLParser;
     }
 
     /**
-     *  where 条件解析器 通过责任链包装，扩展可以在拦截器中做
+     * where 条件解析器 通过责任链包装，扩展可以在拦截器中做
+     *
      * @return
      */
-    public WhereSQLParser newWhereSQLParser(){
+    public WhereSQLParser newWhereSQLParser() {
         WhereSQLParser whereSQLParser = new WhereSQLParser();
-        whereSQLParser = (WhereSQLParser)interceptorChain.pluginAll(whereSQLParser);
+        whereSQLParser = (WhereSQLParser) interceptorChain.pluginAll(whereSQLParser);
         return whereSQLParser;
     }
 
 
-
     /**
-     *  添加拦截器
+     * 添加拦截器
+     *
      * @param interceptor
      */
     public void addInterceptor(Interceptor interceptor) {

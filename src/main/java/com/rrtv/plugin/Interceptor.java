@@ -1,7 +1,5 @@
 package com.rrtv.plugin;
 
-import java.util.Properties;
-
 /**
  * @Classname Interceptor
  * @Description 拦截器
@@ -14,10 +12,6 @@ public interface Interceptor {
 
     default Object plugin(Object target) {
         return Plugin.wrap(target, this);
-    }
-
-    default void setProperties(Properties properties) {
-        // NOP
     }
 
 }

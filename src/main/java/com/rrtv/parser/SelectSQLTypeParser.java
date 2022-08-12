@@ -3,13 +3,13 @@ package com.rrtv.parser;
 import com.alibaba.fastjson.JSON;
 import com.rrtv.common.AggregationFunction;
 import com.rrtv.common.MongoParserResult;
+import com.rrtv.common.ParserPartTypeEnum;
 import com.rrtv.exception.SqlParserException;
 import com.rrtv.orm.Configuration;
 import com.rrtv.parser.data.*;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import org.apache.commons.lang3.ObjectUtils;
@@ -24,9 +24,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SelectSQLTypeParser {
 
@@ -57,14 +57,14 @@ public class SelectSQLTypeParser {
 
         PlainSelect plain = (PlainSelect) select.getSelectBody();
 
-        // 解析 主表
-        FromItem fromItem = plain.getFromItem();
-        Table majorTable = Table.class.cast(fromItem);
-        String majorTableAlias = majorTable.getAlias() == null ? "" : majorTable.getAlias().getName();
+        PartSQLParserData data = new PartSQLParserData();
+        Stream.of(ParserPartTypeEnum.values()).forEach(item -> {
+            configuration.newPartSQLParser(item).proceedData(plain, data);
+        });
 
         // 解析 JOIN 表
-        List<LookUpData> joinParser = configuration.newJoinSQLParser().parser(plain.getJoins(), majorTableAlias);
-
+       // List<LookUpData> joinParser = configuration.newJoinSQLParser().parser(plain.getJoins(), majorTableAlias);
+/*
         // 解析 投影字段
         List<ProjectData> projectData = configuration.newProjectSQLParser().parser(plain.getSelectItems());
 
@@ -81,12 +81,13 @@ public class SelectSQLTypeParser {
         List<SortData> sortData = configuration.newOrderSQLParser().parser(plain.getOrderByElements());
 
         // 解析 分页 limit
-        LimitData limitData = configuration.newLimitSQLParser().parser(plain.getLimit());
+        LimitData limitData = configuration.newLimitSQLParser().parser(plain.getLimit());*/
+
 
         // ====== 下面开始 分析 各个部分 构建 Mongo API ============
         List<AggregationOperation> operations = new ArrayList<>();
 
-        // 分析 join 构建 mongo API
+       /* // 分析 join 构建 mongo API
         Map<String, List<ProjectData>> projectMap = projectData.stream().collect(Collectors.groupingBy(ProjectData::getTable));
         operations.addAll(analysisJoin(joinParser, projectMap));
 
@@ -138,7 +139,11 @@ public class SelectSQLTypeParser {
         }
 
         // 分析投影  构建 mongo API
-        operations.addAll(analysisProject(majorTableAlias, projectData, lookUpDataMap));
+        operations.addAll(analysisProject(majorTableAlias, projectData, lookUpDataMap));*/
+
+
+
+
 
         Aggregation aggregation = Aggregation.newAggregation(operations);
         if (logger.isInfoEnabled()) {
@@ -146,7 +151,6 @@ public class SelectSQLTypeParser {
         }
         Table table = Table.class.cast(plain.getFromItem());
         mongoParserResult = new MongoParserResult(aggregation, table.getName());
-        //  parserCache.put(sql, mongoParserResult);
         return mongoParserResult;
     }
 

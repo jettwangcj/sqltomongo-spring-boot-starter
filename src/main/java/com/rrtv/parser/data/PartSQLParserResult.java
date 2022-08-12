@@ -1,5 +1,6 @@
 package com.rrtv.parser.data;
 
+import com.rrtv.common.ParserPartTypeEnum;
 import lombok.Data;
 
 import java.util.List;
@@ -13,8 +14,8 @@ import java.util.List;
 @Data
 public class PartSQLParserResult<T> {
 
+    private ParserPartTypeEnum partType;
 
-    List<T> parserData;
-
+    private List<T> parserData;
 
 }

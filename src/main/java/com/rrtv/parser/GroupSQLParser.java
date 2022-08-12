@@ -1,6 +1,8 @@
 package com.rrtv.parser;
 
 import com.rrtv.parser.data.GroupData;
+import com.rrtv.parser.data.MatchData;
+import com.rrtv.parser.data.PartSQLParserData;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
@@ -12,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class GroupSQLParser {
+public class GroupSQLParser implements PartSQLParser{
 
     public List<GroupData> parser(GroupByElement element) {
         List<GroupData> groupData = new ArrayList<>();
@@ -28,5 +30,11 @@ public class GroupSQLParser {
             }
         }
         return groupData;
+    }
+
+    @Override
+    public void proceedData(PlainSelect plain, PartSQLParserData data) {
+        List<GroupData> groupData = this.parser(plain.getGroupBy());
+        data.setGroupData(groupData);
     }
 }

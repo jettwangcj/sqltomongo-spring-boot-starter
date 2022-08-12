@@ -1,15 +1,19 @@
 package com.rrtv.parser;
 
 import com.rrtv.parser.data.LimitData;
+import com.rrtv.parser.data.MatchData;
+import com.rrtv.parser.data.PartSQLParserData;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.statement.select.Limit;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.List;
 import java.util.Objects;
 
-public class LimitSQLParser {
+public class LimitSQLParser implements PartSQLParser {
 
     private static final Log logger = LogFactory.getLog(LimitSQLParser.class);
 
@@ -28,5 +32,11 @@ public class LimitSQLParser {
             }
         }
         return null;
+    }
+
+    @Override
+    public void proceedData(PlainSelect plain, PartSQLParserData data) {
+        LimitData limitData = this.parser(plain.getLimit());
+        data.setLimitData(limitData);
     }
 }

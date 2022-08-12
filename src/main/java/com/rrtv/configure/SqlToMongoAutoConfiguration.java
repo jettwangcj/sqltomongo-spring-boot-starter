@@ -7,7 +7,6 @@ import com.rrtv.orm.SqlSessionBuilder;
 import com.rrtv.plugin.InterceptorConfigurer;
 import com.rrtv.plugin.InterceptorConfigurerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

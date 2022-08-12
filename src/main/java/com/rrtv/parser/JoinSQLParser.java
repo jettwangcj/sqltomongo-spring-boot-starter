@@ -2,6 +2,8 @@ package com.rrtv.parser;
 
 import com.rrtv.common.ConversionFunction;
 import com.rrtv.parser.data.LookUpData;
+import com.rrtv.parser.data.PartSQLParserData;
+import com.rrtv.util.SqlCommonUtil;
 import com.rrtv.util.SqlSupportedSyntaxCheckUtil;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -10,15 +12,16 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class JoinSQLParser {
+public class JoinSQLParser implements PartSQLParser {
 
-    public List<LookUpData> parser(List<Join> joins, String majorTableAlias ) {
+    private List<LookUpData> parser(List<Join> joins, String majorTableAlias ) {
 
         List<LookUpData> lookUpData = new ArrayList<>();
 
@@ -117,5 +120,11 @@ public class JoinSQLParser {
             }
         }
         return lookUpData;
+    }
+
+    @Override
+    public void proceedData(PlainSelect plain, PartSQLParserData data) {
+        List<LookUpData> lookUpData = this.parser(plain.getJoins(), SqlCommonUtil.getMajorTableAlias(plain));
+        data.setJoinParser(lookUpData);
     }
 }

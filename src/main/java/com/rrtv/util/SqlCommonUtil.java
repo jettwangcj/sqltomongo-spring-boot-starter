@@ -4,6 +4,7 @@ import com.rrtv.exception.SqlParserException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.alter.Alter;
 import net.sf.jsqlparser.statement.create.index.CreateIndex;
@@ -15,6 +16,7 @@ import net.sf.jsqlparser.statement.execute.Execute;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.merge.Merge;
 import net.sf.jsqlparser.statement.replace.Replace;
+import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.truncate.Truncate;
@@ -97,6 +99,14 @@ public class SqlCommonUtil {
 
         PlainSelect plain = (PlainSelect) select.getSelectBody();
         return plain;
+    }
+
+    public static String getMajorTableAlias(PlainSelect plain){
+        // 解析 主表
+        FromItem fromItem = plain.getFromItem();
+        Table majorTable = Table.class.cast(fromItem);
+        String majorTableAlias = majorTable.getAlias() == null ? "" : majorTable.getAlias().getName();
+        return majorTableAlias;
     }
 
     /**

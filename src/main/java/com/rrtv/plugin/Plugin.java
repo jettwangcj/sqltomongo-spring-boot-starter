@@ -1,5 +1,9 @@
 package com.rrtv.plugin;
 
+import com.rrtv.annotation.Intercepts;
+import com.rrtv.annotation.Signature;
+import com.rrtv.exception.PluginException;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -27,7 +31,7 @@ public class Plugin implements InvocationHandler {
     }
 
     public static Object wrap(Object target, Interceptor interceptor) {
-        Map<Class<?>, Set<Method>> signatureMap = null;//getSignatureMap(interceptor);
+        Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
         Class<?> type = target.getClass();
         Class<?>[] interfaces = getAllInterfaces(type, signatureMap);
         if (interfaces.length > 0) {
@@ -52,9 +56,8 @@ public class Plugin implements InvocationHandler {
         }
     }
 
-    /*private static Map<Class<?>, Set<Method>> getSignatureMap(Interceptor interceptor) {
+    private static Map<Class<?>, Set<Method>> getSignatureMap(Interceptor interceptor) {
         Intercepts interceptsAnnotation = interceptor.getClass().getAnnotation(Intercepts.class);
-        // issue #251
         if (interceptsAnnotation == null) {
             throw new PluginException("No @Intercepts annotation was found in interceptor " + interceptor.getClass().getName());
         }
@@ -70,7 +73,7 @@ public class Plugin implements InvocationHandler {
             }
         }
         return signatureMap;
-    }*/
+    }
 
     private static Class<?>[] getAllInterfaces(Class<?> type, Map<Class<?>, Set<Method>> signatureMap) {
         Set<Class<?>> interfaces = new HashSet<>();

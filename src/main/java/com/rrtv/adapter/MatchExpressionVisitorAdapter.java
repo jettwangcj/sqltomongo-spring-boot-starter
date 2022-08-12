@@ -1,6 +1,7 @@
 package com.rrtv.adapter;
 
 import com.rrtv.common.AggregationFunction;
+import com.rrtv.common.ParserPartTypeEnum;
 import com.rrtv.exception.NotSupportFunctionException;
 import com.rrtv.parser.data.MatchData;
 import com.rrtv.util.SqlCommonUtil;
@@ -20,7 +21,7 @@ public class MatchExpressionVisitorAdapter extends ExpressionVisitorAdapter {
 
     private int priority = 0;
 
-    private ParserPart part;
+    private ParserPartTypeEnum part;
 
     public List<MatchData> getItems() {
         return items;
@@ -28,7 +29,7 @@ public class MatchExpressionVisitorAdapter extends ExpressionVisitorAdapter {
 
     public MatchExpressionVisitorAdapter() {}
 
-    public MatchExpressionVisitorAdapter(ParserPart part){
+    public MatchExpressionVisitorAdapter(ParserPartTypeEnum part){
         this.part = part;
     }
 
@@ -48,14 +49,14 @@ public class MatchExpressionVisitorAdapter extends ExpressionVisitorAdapter {
     protected void visitBinaryExpression(BinaryExpression expr) {
         if (expr instanceof ComparisonOperator || expr instanceof LikeExpression) {
 
-            if (!(expr.getLeftExpression() instanceof Column) && ParserPart.where == part) {
+            if (!(expr.getLeftExpression() instanceof Column) && ParserPartTypeEnum.WHERE == part) {
                 //报错 暂不支持 where 不支持 函数
                 throw new NotSupportFunctionException("where 条件不支持函数操作");
             }
 
             Expression expression = expr.getLeftExpression();
             AggregationFunction function = null;
-            if(expr.getLeftExpression() instanceof Function && ParserPart.having == part){
+            if(expr.getLeftExpression() instanceof Function && ParserPartTypeEnum.HAVING == part){
                 Function leftFunction = (Function) expr.getLeftExpression();
                 function = AggregationFunction.parser(leftFunction.getName());
                 ExpressionList parameters = leftFunction.getParameters();
@@ -117,11 +118,5 @@ public class MatchExpressionVisitorAdapter extends ExpressionVisitorAdapter {
     }
 
 
-    /**
-     *  解析部位 where 或者 having
-     */
-    public enum ParserPart {
-        where,
-        having;
-    }
+
 }
