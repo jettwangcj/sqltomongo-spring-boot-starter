@@ -7,10 +7,7 @@ import com.rrtv.exception.PluginException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @Classname Plugin
@@ -57,10 +54,13 @@ public class Plugin implements InvocationHandler {
     }
 
     private static Map<Class<?>, Set<Method>> getSignatureMap(Interceptor interceptor) {
-        Intercepts interceptsAnnotation = interceptor.getClass().getAnnotation(Intercepts.class);
+        Intercepts interceptsAnnotation = Optional.ofNullable(interceptor.getClass().getAnnotation(Intercepts.class))
+                .orElse(interceptor.getClass().getSuperclass().getAnnotation(Intercepts.class));
         if (interceptsAnnotation == null) {
+
             throw new PluginException("No @Intercepts annotation was found in interceptor " + interceptor.getClass().getName());
         }
+
         Signature[] sigs = interceptsAnnotation.value();
         Map<Class<?>, Set<Method>> signatureMap = new HashMap<>();
         for (Signature sig : sigs) {

@@ -1,6 +1,6 @@
 package com.rrtv.analyzer;
 
-import com.rrtv.parser.data.PartSQLParserResult;
+import com.rrtv.parser.data.PartSQLParserData;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 
 import java.util.List;
@@ -8,11 +8,15 @@ import java.util.List;
 /**
  * @Classname Analyzer
  * @Description
- * @Date 2022/8/12 11:51
+ * @Date 2022/8/15 16:24
  * @Created by wangchangjiu
  */
-public interface Analyzer<T> {
+public interface Analyzer {
 
-   void proceed(List<AggregationOperation> operations, PartSQLParserResult<T> partSQLParserResult);
+    void setNextAnalyzer(Analyzer checker);
+
+    void analysis(List<AggregationOperation> operations, PartSQLParserData data);
+
+    void proceed(List<AggregationOperation> operations, PartSQLParserData data);
 
 }

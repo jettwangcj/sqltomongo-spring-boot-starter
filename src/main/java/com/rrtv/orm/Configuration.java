@@ -1,5 +1,6 @@
 package com.rrtv.orm;
 
+import com.rrtv.analyzer.*;
 import com.rrtv.binding.MapperAnnotationBuilder;
 import com.rrtv.binding.MapperProxyFactory;
 import com.rrtv.common.ParserPartTypeEnum;
@@ -8,11 +9,14 @@ import com.rrtv.executor.CachingExecutor;
 import com.rrtv.executor.DefaultExecutor;
 import com.rrtv.executor.Executor;
 import com.rrtv.parser.*;
+import com.rrtv.parser.data.PartSQLParserData;
 import com.rrtv.plugin.Interceptor;
 import com.rrtv.plugin.InterceptorChain;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +30,7 @@ public class Configuration {
     /**
      * 缓存标志
      */
-    private final boolean cacheEnabled = false;
+    private boolean cacheEnabled = false;
 
     /**
      * Mapper 代理
@@ -52,103 +56,40 @@ public class Configuration {
      * @return
      */
     public Executor newExecutor(MongoTemplate mongoTemplate, SelectSQLTypeParser selectSQLTypeParser) {
-        Executor executor;
+        Executor executor = new DefaultExecutor(mongoTemplate, selectSQLTypeParser);
         if (cacheEnabled) {
             executor = new CachingExecutor(executor);
-        } else {
-            executor = new DefaultExecutor(mongoTemplate, selectSQLTypeParser);
         }
         executor = (Executor) interceptorChain.pluginAll(executor);
         return executor;
     }
 
 
-    public PartSQLParser newPartSQLParser(ParserPartTypeEnum typeEnum){
+    /**
+     *  创建 SQL 解析器
+     * @param typeEnum
+     * @return
+     */
+    public PartSQLParser newPartSQLParser(ParserPartTypeEnum typeEnum) {
         PartSQLParser partSQLParser = null;
-        if(typeEnum == ParserPartTypeEnum.GROUP){
+        if (typeEnum == ParserPartTypeEnum.GROUP) {
             partSQLParser = new GroupSQLParser();
+        } else if (typeEnum == ParserPartTypeEnum.HAVING) {
+            partSQLParser = new HavingSQLParser();
+        } else if (typeEnum == ParserPartTypeEnum.LIMIT) {
+            partSQLParser = new LimitSQLParser();
+        } else if (typeEnum == ParserPartTypeEnum.PROJECT) {
+            partSQLParser = new ProjectSQLParser();
+        } else if (typeEnum == ParserPartTypeEnum.ORDER) {
+            partSQLParser = new OrderSQLParser();
+        } else if (typeEnum == ParserPartTypeEnum.JOIN) {
+            partSQLParser = new JoinSQLParser();
+        } else if (typeEnum == ParserPartTypeEnum.WHERE) {
+            partSQLParser = new WhereSQLParser();
         }
-
+        partSQLParser = (PartSQLParser) interceptorChain.pluginAll(partSQLParser);
         return partSQLParser;
     }
-
-    /**
-     * Join 解析器 通过责任链包装，扩展可以在拦截器中做
-     *
-     * @return
-     */
-    public JoinSQLParser newJoinSQLParser() {
-        JoinSQLParser joinSQLParser = new JoinSQLParser();
-        joinSQLParser = (JoinSQLParser) interceptorChain.pluginAll(joinSQLParser);
-        return joinSQLParser;
-    }
-
-    /**
-     * 分组SQL解析器 通过责任链包装，扩展可以在拦截器中做
-     *
-     * @return
-     */
-    public GroupSQLParser newGroupSQLParser() {
-        GroupSQLParser groupSQLParser = new GroupSQLParser();
-        groupSQLParser = (GroupSQLParser) interceptorChain.pluginAll(groupSQLParser);
-        return groupSQLParser;
-    }
-
-    /**
-     * Having SQL解析器 通过责任链包装，扩展可以在拦截器中做
-     *
-     * @return
-     */
-    public HavingSQLParser newHavingSQLParser() {
-        HavingSQLParser havingSQLParser = new HavingSQLParser();
-        havingSQLParser = (HavingSQLParser) interceptorChain.pluginAll(havingSQLParser);
-        return havingSQLParser;
-    }
-
-    /**
-     * Mongo 投影解析器 通过责任链包装，扩展可以在拦截器中做
-     *
-     * @return
-     */
-    public ProjectSQLParser newProjectSQLParser() {
-        ProjectSQLParser projectSQLParser = new ProjectSQLParser();
-        projectSQLParser = (ProjectSQLParser) interceptorChain.pluginAll(projectSQLParser);
-        return projectSQLParser;
-    }
-
-    /**
-     * 排序 解析器 通过责任链包装，扩展可以在拦截器中做
-     *
-     * @return
-     */
-    public OrderSQLParser newOrderSQLParser() {
-        OrderSQLParser orderSQLParser = new OrderSQLParser();
-        orderSQLParser = (OrderSQLParser) interceptorChain.pluginAll(orderSQLParser);
-        return orderSQLParser;
-    }
-
-    /**
-     * Limit 解析器 通过责任链包装，扩展可以在拦截器中做
-     *
-     * @return
-     */
-    public LimitSQLParser newLimitSQLParser() {
-        LimitSQLParser limitSQLParser = new LimitSQLParser();
-        limitSQLParser = (LimitSQLParser) interceptorChain.pluginAll(limitSQLParser);
-        return limitSQLParser;
-    }
-
-    /**
-     * where 条件解析器 通过责任链包装，扩展可以在拦截器中做
-     *
-     * @return
-     */
-    public WhereSQLParser newWhereSQLParser() {
-        WhereSQLParser whereSQLParser = new WhereSQLParser();
-        whereSQLParser = (WhereSQLParser) interceptorChain.pluginAll(whereSQLParser);
-        return whereSQLParser;
-    }
-
 
     /**
      * 添加拦截器
@@ -202,5 +143,18 @@ public class Configuration {
 
     public void setMapperElement(Map<String, XNode> mapperElement) {
         this.mapperElement = mapperElement;
+    }
+
+
+    public Analyzer newAnalyzer() {
+      return new AbstractAnalyzer.Builder()
+                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new JoinAnalyzer()))
+                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new MatchAnalyzer()))
+                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new GroupAnalyzer()))
+                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new HavingAnalyzer()))
+                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new SortAnalyzer()))
+                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new LimitAnalyzer()))
+                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new ProjectAnalyzer()))
+                .build();
     }
 }

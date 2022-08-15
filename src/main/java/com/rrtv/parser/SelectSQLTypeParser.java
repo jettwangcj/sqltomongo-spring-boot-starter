@@ -1,12 +1,14 @@
 package com.rrtv.parser;
 
 import com.alibaba.fastjson.JSON;
+import com.rrtv.analyzer.Analyzer;
 import com.rrtv.common.AggregationFunction;
 import com.rrtv.common.MongoParserResult;
 import com.rrtv.common.ParserPartTypeEnum;
 import com.rrtv.exception.SqlParserException;
 import com.rrtv.orm.Configuration;
 import com.rrtv.parser.data.*;
+import com.rrtv.util.SqlCommonUtil;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
@@ -48,44 +50,21 @@ public class SelectSQLTypeParser {
             return mongoParserResult;
         }
 
-        Select select;
-        try {
-            select = (Select) CCJSqlParserUtil.parse(sql);
-        } catch (JSQLParserException ex) {
-            throw new SqlParserException("sql解析失败：", ex);
-        }
+        PlainSelect plain = SqlCommonUtil.parserSelectSql(sql);
 
-        PlainSelect plain = (PlainSelect) select.getSelectBody();
-
+        // 解析后的数据
         PartSQLParserData data = new PartSQLParserData();
         Stream.of(ParserPartTypeEnum.values()).forEach(item -> {
+            // 开始解析SQL各个部分
             configuration.newPartSQLParser(item).proceedData(plain, data);
         });
 
-        // 解析 JOIN 表
-       // List<LookUpData> joinParser = configuration.newJoinSQLParser().parser(plain.getJoins(), majorTableAlias);
-/*
-        // 解析 投影字段
-        List<ProjectData> projectData = configuration.newProjectSQLParser().parser(plain.getSelectItems());
-
-        // 解析 条件 匹配
-        List<MatchData> matchData = configuration.newWhereSQLParser().parser(plain.getWhere());
-
-        // 解析 分组
-        List<GroupData> groupData = configuration.newGroupSQLParser().parser(plain.getGroupBy());
-
-        // 解析 having 过滤
-        List<MatchData> havingData = configuration.newHavingSQLParser().parser(plain.getHaving());
-
-        // 解析 排序
-        List<SortData> sortData = configuration.newOrderSQLParser().parser(plain.getOrderByElements());
-
-        // 解析 分页 limit
-        LimitData limitData = configuration.newLimitSQLParser().parser(plain.getLimit());*/
-
-
         // ====== 下面开始 分析 各个部分 构建 Mongo API ============
         List<AggregationOperation> operations = new ArrayList<>();
+
+        Analyzer analyzer = configuration.newAnalyzer();
+        analyzer.analysis(operations, data);
+
 
        /* // 分析 join 构建 mongo API
         Map<String, List<ProjectData>> projectMap = projectData.stream().collect(Collectors.groupingBy(ProjectData::getTable));
@@ -140,9 +119,6 @@ public class SelectSQLTypeParser {
 
         // 分析投影  构建 mongo API
         operations.addAll(analysisProject(majorTableAlias, projectData, lookUpDataMap));*/
-
-
-
 
 
         Aggregation aggregation = Aggregation.newAggregation(operations);

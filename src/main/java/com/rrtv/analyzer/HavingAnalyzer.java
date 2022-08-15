@@ -14,24 +14,28 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * @Classname MatchAnalyzer
+ * @Classname HavingAnalyzer
  * @Description
  * @Date 2022/8/12 11:53
  * @Created by wangchangjiu
  */
-public class MatchAnalyzer extends AbstractAnalyzer {
+public class HavingAnalyzer extends AbstractAnalyzer {
 
 
     @Override
     public void proceed(List<AggregationOperation> operations, PartSQLParserData data) {
+
+        List<MatchData> havingData = data.getHavingData();
+        String majorTableAlias = data.getMajorTableAlias();
         List<LookUpData> joinParser = data.getJoinParser();
-        List<MatchData> matchData = data.getMatchData();
 
         // 别名和表的映射
         Map<String, LookUpData> lookUpDataMap = joinParser.stream().collect(Collectors.toMap(LookUpData::getAlias, Function.identity()));
 
-        // 分析 匹配 过滤  构建 mongo API
-        operations.addAll(analysisMatch(data.getMajorTableAlias(), matchData, lookUpDataMap));
+        // 分析 having
+        if (!CollectionUtils.isEmpty(havingData)) {
+            operations.addAll(analysisMatch(majorTableAlias, havingData, lookUpDataMap));
+        }
 
     }
 
@@ -43,7 +47,7 @@ public class MatchAnalyzer extends AbstractAnalyzer {
      * @param lookUpDataMap
      * @return
      */
-    private static List<AggregationOperation> analysisMatch(String majorTableAlias, List<MatchData> matchData, Map<String, LookUpData> lookUpDataMap) {
+    private List<AggregationOperation> analysisMatch(String majorTableAlias, List<MatchData> matchData, Map<String, LookUpData> lookUpDataMap) {
         List<AggregationOperation> operations = new ArrayList<>();
         Deque<Criteria> stack = new ArrayDeque<>();
         if (!CollectionUtils.isEmpty(matchData)) {

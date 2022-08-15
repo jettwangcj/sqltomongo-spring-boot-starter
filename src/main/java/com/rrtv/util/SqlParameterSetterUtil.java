@@ -116,7 +116,8 @@ public class SqlParameterSetterUtil {
             sb.append("\\'null\\'");
         } else if(objParam instanceof String){
             String param = String.class.cast(objParam);
-           sb.append("\\'").append(filter(param)).append("\\'");
+         //  sb.append("\\'").append(filter(param)).append("\\'");
+           sb.append("\\'").append(param).append("\\'");
         } else if(isNumberType(objParam)){
             sb.append(objParam);
         }

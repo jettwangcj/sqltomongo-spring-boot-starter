@@ -1,12 +1,14 @@
 package com.rrtv.parser;
 
 import com.rrtv.common.AggregationFunction;
+import com.rrtv.parser.data.PartSQLParserData;
 import com.rrtv.parser.data.ProjectData;
 import com.rrtv.util.SqlSupportedSyntaxCheckUtil;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang3.ObjectUtils;
@@ -15,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProjectSQLParser {
+public class ProjectSQLParser implements PartSQLParser{
 
     public List<ProjectData> parser(List<SelectItem> selectItems) {
 
@@ -62,5 +64,11 @@ public class ProjectSQLParser {
 
         }
         return projects;
+    }
+
+    @Override
+    public void proceedData(PlainSelect plain, PartSQLParserData data) {
+        List<ProjectData> projectData = this.parser(plain.getSelectItems());
+        data.setProjectData(projectData);
     }
 }

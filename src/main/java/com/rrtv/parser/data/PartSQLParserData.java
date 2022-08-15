@@ -13,6 +13,8 @@ import java.util.List;
 @Data
 public class PartSQLParserData {
 
+    private String majorTableAlias;
+
     private List<LookUpData> joinParser;
 
     private List<ProjectData> projectData;

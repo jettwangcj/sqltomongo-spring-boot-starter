@@ -12,7 +12,7 @@ public class InterceptorConfigurerAdapter implements InterceptorConfigurer {
 
     @Override
     public void addInterceptor(Configuration configuration) {
-
+        configuration.addInterceptor(new InterceptorTemplate());
     }
 
 }
