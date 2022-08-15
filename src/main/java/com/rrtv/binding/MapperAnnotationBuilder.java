@@ -1,6 +1,11 @@
 package com.rrtv.binding;
 
 import com.rrtv.orm.Configuration;
+import com.rrtv.orm.XNode;
+import com.rrtv.util.SqlCommonUtil;
+import com.rrtv.util.SqlSupportedSyntaxCheckUtil;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -16,11 +21,6 @@ import java.util.stream.Stream;
  */
 public class MapperAnnotationBuilder {
 
-    /*private static final Set<Class<? extends Annotation>> statementAnnotationTypes = Stream
-            .of(Select.class, Update.class, Insert.class, Delete.class, SelectProvider.class, UpdateProvider.class,
-                    InsertProvider.class, DeleteProvider.class)
-            .collect(Collectors.toSet());
-*/
     private final Configuration configuration;
     private final Class<?> type;
 
@@ -30,29 +30,25 @@ public class MapperAnnotationBuilder {
     }
 
     public void parse() {
-        String resource = type.toString();
-        /*if (!configuration.isResourceLoaded(resource)) {
-            loadXmlResource();
-            configuration.addLoadedResource(resource);
-            assistant.setCurrentNamespace(type.getName());
-            parseCache();
-            parseCacheRef();
-            for (Method method : type.getMethods()) {
-                if (!canHaveStatement(method)) {
-                    continue;
+        Method[] methods = ReflectionUtils.getDeclaredMethods(type);
+        if(methods != null && methods.length > 0){
+            Stream.of(methods).forEach(method -> {
+                Select select = method.getAnnotation(Select.class);
+                if(select != null){
+                    String sql = select.value();
+
+                    SqlSupportedSyntaxCheckUtil.checkSelectSql(sql);
+
+                    String key = type.getName() + "." + method.getName();
+                    XNode xNode = new XNode();
+                    xNode.setId(method.getName());
+                    xNode.setNamespace(type.getName());
+                    xNode.setSql(sql);
+                    xNode.setSqlType(SqlCommonUtil.SqlType.SELECT);
+                    configuration.addMapperElement(key, xNode);
                 }
-                if (getAnnotationWrapper(method, false, Select.class, SelectProvider.class).isPresent()
-                        && method.getAnnotation(ResultMap.class) == null) {
-                    parseResultMap(method);
-                }
-                try {
-                    parseStatement(method);
-                } catch (IncompleteElementException e) {
-                    configuration.addIncompleteMethod(new MethodResolver(this, method));
-                }
-            }
+            });
         }
-        parsePendingMethods();*/
     }
 
 }

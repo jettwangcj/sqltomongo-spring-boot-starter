@@ -13,6 +13,7 @@ import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.FromItem;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
@@ -102,5 +103,16 @@ public class SqlSupportedSyntaxCheckUtil {
             throw new TableAssociationException("表关联函数参数有误");
         }
 
+    }
+
+    public static void checkSelectSql(String sql){
+        if(StringUtils.isEmpty(sql)){
+            throw new SqlParserException("sql 不能为空");
+        }
+        try {
+            SqlSupportedSyntaxCheckUtil.checkSqlType(sql, SqlCommonUtil.SqlType.SELECT);
+        }catch (SqlTypeException ex) {
+            throw new SqlTypeException("检测到SQL不是 Select 语句，请检查");
+        }
     }
 }

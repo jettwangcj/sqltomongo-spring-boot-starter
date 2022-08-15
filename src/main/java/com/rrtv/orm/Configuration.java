@@ -9,14 +9,11 @@ import com.rrtv.executor.CachingExecutor;
 import com.rrtv.executor.DefaultExecutor;
 import com.rrtv.executor.Executor;
 import com.rrtv.parser.*;
-import com.rrtv.parser.data.PartSQLParserData;
 import com.rrtv.plugin.Interceptor;
 import com.rrtv.plugin.InterceptorChain;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -112,10 +109,21 @@ public class Configuration {
         }
     }
 
+    /**
+     *  判断是否有 Mapper
+     * @param type
+     * @param <T>
+     * @return
+     */
     public <T> boolean hasMapper(Class<T> type) {
         return knownMappers.containsKey(type);
     }
 
+    /**
+     *  添加 Mapper
+     * @param type
+     * @param <T>
+     */
     public <T> void addMapper(Class<T> type) {
         if (type.isInterface()) {
             if (hasMapper(type)) {
@@ -144,6 +152,11 @@ public class Configuration {
     public void setMapperElement(Map<String, XNode> mapperElement) {
         this.mapperElement = mapperElement;
     }
+
+    public void addMapperElement(String key, XNode xNode) {
+        this.mapperElement.put(key, xNode);
+    }
+
 
 
     /**

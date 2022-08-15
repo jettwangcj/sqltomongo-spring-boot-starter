@@ -1,6 +1,7 @@
 package com.rrtv.orm;
 
 import com.rrtv.util.SqlCommonUtil;
+import com.rrtv.util.SqlSupportedSyntaxCheckUtil;
 import org.dom4j.Element;
 
 import java.util.HashMap;
@@ -20,6 +21,9 @@ public class DomParser {
             for (Element node : selectNodes) {
                 String id = node.attributeValue("id");
                 String sql = node.getText();
+
+                SqlSupportedSyntaxCheckUtil.checkSelectSql(sql);
+
                 XNode xNode = new XNode();
                 xNode.setNamespace(namespace);
                 xNode.setId(id);
