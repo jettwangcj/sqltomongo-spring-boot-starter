@@ -146,6 +146,10 @@ public class Configuration {
     }
 
 
+    /**
+     *  创建 SQL 分析器责任链 （被拦截器包裹的）
+     * @return
+     */
     public Analyzer newAnalyzer() {
       return new AbstractAnalyzer.Builder()
                 .addAnalyzer((Analyzer) interceptorChain.pluginAll(new JoinAnalyzer()))
