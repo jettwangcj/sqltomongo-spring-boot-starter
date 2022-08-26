@@ -1,6 +1,7 @@
 package com.rrtv.cache;
 
 import com.mongodb.client.result.UpdateResult;
+import com.rrtv.orm.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -15,18 +16,21 @@ public class MongoTemplateProxy extends MongoTemplate implements ApplicationEven
 
     private ApplicationEventPublisher applicationEventPublisher;
 
-    public MongoTemplateProxy(MongoDatabaseFactory mongoDbFactory) {
+    private final Configuration configuration;
+
+    public MongoTemplateProxy(MongoDatabaseFactory mongoDbFactory, Configuration configuration) {
         super(mongoDbFactory);
+        this.configuration = configuration;
     }
 
     @Override
     protected UpdateResult doUpdate(String collectionName, Query query, UpdateDefinition update,
                                     @Nullable Class<?> entityClass, boolean upsert, boolean multi)  {
         UpdateResult updateResult = super.doUpdate(collectionName, query, update, entityClass, upsert, multi);
-/*
-        // 发布清除缓存事件
-        applicationEventPublisher.publishEvent(new ClearCacheEvent(new Object()));*/
-
+        if(configuration.isCacheEnabled()){
+            // 发布清除缓存事件
+            applicationEventPublisher.publishEvent(new ClearCacheEvent(new Object()));
+        }
         return updateResult;
     }
 

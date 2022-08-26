@@ -15,6 +15,8 @@ public class PartSQLParserData {
 
     private String majorTableAlias;
 
+    private String majorTable;
+
     private List<LookUpData> joinParser;
 
     private List<ProjectData> projectData;

@@ -3,6 +3,7 @@ package com.rrtv.orm;
 import com.rrtv.analyzer.*;
 import com.rrtv.binding.MapperAnnotationBuilder;
 import com.rrtv.binding.MapperProxyFactory;
+import com.rrtv.cache.Cache;
 import com.rrtv.common.ParserPartTypeEnum;
 import com.rrtv.exception.BindingException;
 import com.rrtv.executor.CachingExecutor;
@@ -30,6 +31,11 @@ public class Configuration {
     private boolean cacheEnabled = false;
 
     /**
+     *  缓存
+     */
+    private Cache cache;
+
+    /**
      * Mapper 代理
      */
     private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();
@@ -55,7 +61,7 @@ public class Configuration {
     public Executor newExecutor(MongoTemplate mongoTemplate, SelectSQLTypeParser selectSQLTypeParser) {
         Executor executor = new DefaultExecutor(mongoTemplate, selectSQLTypeParser);
         if (cacheEnabled) {
-            executor = new CachingExecutor(executor);
+            executor = new CachingExecutor(executor, this);
         }
         executor = (Executor) interceptorChain.pluginAll(executor);
         return executor;
@@ -153,11 +159,25 @@ public class Configuration {
         this.mapperElement = mapperElement;
     }
 
+    public boolean isCacheEnabled() {
+        return cacheEnabled;
+    }
+
+    public void setCacheEnabled(boolean cacheEnabled) {
+        this.cacheEnabled = cacheEnabled;
+    }
+
     public void addMapperElement(String key, XNode xNode) {
         this.mapperElement.put(key, xNode);
     }
 
+    public void setCache(Cache cache) {
+        this.cache = cache;
+    }
 
+    public Cache getCache() {
+        return cache;
+    }
 
     /**
      *  创建 SQL 分析器责任链 （被拦截器包裹的）

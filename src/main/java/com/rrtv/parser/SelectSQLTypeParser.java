@@ -7,7 +7,6 @@ import com.rrtv.common.ParserPartTypeEnum;
 import com.rrtv.orm.Configuration;
 import com.rrtv.parser.data.PartSQLParserData;
 import com.rrtv.util.SqlCommonUtil;
-import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,24 +32,21 @@ public class SelectSQLTypeParser {
         this.configuration = configuration;
     }
 
-    public MongoParserResult parser(String sql) {
-
-        MongoParserResult mongoParserResult = parserCache.get(sql);
-        if (mongoParserResult != null) {
-            return mongoParserResult;
-        }
-
+    public PartSQLParserData sqlParserData(String sql){
         PlainSelect plain = SqlCommonUtil.parserSelectSql(sql);
-
         // 解析后的数据
         PartSQLParserData data = new PartSQLParserData();
         data.setMajorTableAlias(SqlCommonUtil.getMajorTableAlias(plain));
+        data.setMajorTable(SqlCommonUtil.getMajorTable(plain));
 
         Stream.of(ParserPartTypeEnum.values()).forEach(item -> {
             // 开始解析SQL各个部分
             configuration.newPartSQLParser(item).proceedData(plain, data);
         });
+        return data;
+    }
 
+    public MongoParserResult mongoAggregationAnalyzer(PartSQLParserData data){
         // ====== 下面开始 分析 各个部分 构建 Mongo API ============
         List<AggregationOperation> operations = new ArrayList<>();
 
@@ -62,8 +58,17 @@ public class SelectSQLTypeParser {
         if (logger.isInfoEnabled()) {
             logger.info("build Aggregation : " + JSON.toJSONString(aggregation));
         }
-        Table table = Table.class.cast(plain.getFromItem());
-        mongoParserResult = new MongoParserResult(aggregation, table.getName());
+        return new MongoParserResult(aggregation, data.getMajorTable());
+    }
+
+    public MongoParserResult parser(String sql) {
+        MongoParserResult mongoParserResult = parserCache.get(sql);
+        if (mongoParserResult != null) {
+            return mongoParserResult;
+        }
+        // 解析后的数据
+        PartSQLParserData data = this.sqlParserData(sql);
+        mongoParserResult = this.mongoAggregationAnalyzer(data);
         return mongoParserResult;
     }
 

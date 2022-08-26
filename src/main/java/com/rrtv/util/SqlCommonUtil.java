@@ -109,6 +109,13 @@ public class SqlCommonUtil {
         return majorTableAlias;
     }
 
+    public static String getMajorTable(PlainSelect plain){
+        // 解析 主表
+        FromItem fromItem = plain.getFromItem();
+        Table majorTable = Table.class.cast(fromItem);
+        return majorTable.getName();
+    }
+
     /**
      * 处理表达式的 右边值
      *

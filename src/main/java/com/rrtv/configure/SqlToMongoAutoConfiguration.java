@@ -2,6 +2,7 @@ package com.rrtv.configure;
 
 import com.rrtv.SQLToMongoTemplate;
 import com.rrtv.cache.MongoTemplateProxy;
+import com.rrtv.orm.ConfigurationBuilder;
 import com.rrtv.orm.SqlSession;
 import com.rrtv.orm.SqlSessionBuilder;
 import com.rrtv.plugin.InterceptorConfigurer;
@@ -25,11 +26,18 @@ public class SqlToMongoAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public com.rrtv.orm.Configuration configuration(@Autowired SqlToMongoProperties properties,
+                                                    @Autowired InterceptorConfigurer interceptorConfigurer) throws Exception {
+        return new ConfigurationBuilder().build(interceptorConfigurer, properties);
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean
     @DependsOn({"mongoTemplate"})
     public SqlSession sqlSession(@Autowired(required = false) MongoTemplateProxy mongoTemplate,
-                                 @Autowired  SqlToMongoProperties properties,
-                                 @Autowired InterceptorConfigurer interceptorConfigurer) throws Exception {
-        return new SqlSessionBuilder().build(mongoTemplate, interceptorConfigurer,  properties);
+                                 @Autowired com.rrtv.orm.Configuration configuration) {
+        return new SqlSessionBuilder().build(mongoTemplate, configuration);
     }
 
 
