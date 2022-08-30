@@ -4,6 +4,7 @@ import com.rrtv.analyzer.*;
 import com.rrtv.binding.MapperAnnotationBuilder;
 import com.rrtv.binding.MapperProxyFactory;
 import com.rrtv.cache.Cache;
+import com.rrtv.cache.CacheManager;
 import com.rrtv.common.ParserPartTypeEnum;
 import com.rrtv.exception.BindingException;
 import com.rrtv.executor.CachingExecutor;
@@ -16,6 +17,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Classname Configuration
@@ -29,6 +31,12 @@ public class Configuration {
      * 缓存标志
      */
     private boolean cacheEnabled = false;
+
+    /**
+     *  缓存管理器
+     */
+    private CacheManager cacheManager;
+
 
     /**
      *  缓存
@@ -48,25 +56,55 @@ public class Configuration {
     /**
      * 拦截器链条
      */
-    private final InterceptorChain interceptorChain = new InterceptorChain();
+    private static final InterceptorChain interceptorChain = new InterceptorChain();
 
     /**
-     * 创建执行器 缓存执行器 和 默认执行器
-     * 并对执行器增加拦截器处理
-     *
-     * @param mongoTemplate
-     * @param selectSQLTypeParser
+     *  SQL 分析器
+     */
+    private static volatile Analyzer analyzer;
+
+    /**
+     *  SQL 解析器缓存
+     */
+    private static Map<ParserPartTypeEnum, PartSQLParser> partSQLParserCache = new ConcurrentHashMap<>();
+
+
+    /**
+     *  创建 SQL 分析器责任链 （被拦截器包裹的）
      * @return
      */
-    public Executor newExecutor(MongoTemplate mongoTemplate, SelectSQLTypeParser selectSQLTypeParser) {
-        Executor executor = new DefaultExecutor(mongoTemplate, selectSQLTypeParser);
-        if (cacheEnabled) {
-            executor = new CachingExecutor(executor, this);
+    public static Analyzer getAnalyzerInstance() {
+        if (analyzer == null) { //双重检测机制
+            synchronized (Analyzer.class) { //同步锁
+                if (analyzer == null) { //双重检测机制
+                    analyzer = new AbstractAnalyzer.Builder()
+                            .addAnalyzer((Analyzer) interceptorChain.pluginAll(new JoinAnalyzer()))
+                            .addAnalyzer((Analyzer) interceptorChain.pluginAll(new MatchAnalyzer()))
+                            .addAnalyzer((Analyzer) interceptorChain.pluginAll(new GroupAnalyzer()))
+                            .addAnalyzer((Analyzer) interceptorChain.pluginAll(new HavingAnalyzer()))
+                            .addAnalyzer((Analyzer) interceptorChain.pluginAll(new SortAnalyzer()))
+                            .addAnalyzer((Analyzer) interceptorChain.pluginAll(new LimitAnalyzer()))
+                            .addAnalyzer((Analyzer) interceptorChain.pluginAll(new ProjectAnalyzer()))
+                            .build();
+                }
+            }
         }
-        executor = (Executor) interceptorChain.pluginAll(executor);
-        return executor;
+        return analyzer;
     }
 
+    /**
+     *  优先缓存获取实例
+     * @param typeEnum
+     * @return
+     */
+    public PartSQLParser getPartSQLParserInstance(ParserPartTypeEnum typeEnum){
+        if(partSQLParserCache.containsKey(typeEnum)){
+            return partSQLParserCache.get(typeEnum);
+        }
+        PartSQLParser partSQLParser = newPartSQLParser(typeEnum);
+        partSQLParserCache.put(typeEnum, partSQLParser);
+        return partSQLParser;
+    }
 
     /**
      *  创建 SQL 解析器
@@ -93,6 +131,24 @@ public class Configuration {
         partSQLParser = (PartSQLParser) interceptorChain.pluginAll(partSQLParser);
         return partSQLParser;
     }
+
+    /**
+     * 创建执行器 缓存执行器 和 默认执行器
+     * 并对执行器增加拦截器处理
+     *
+     * @param mongoTemplate
+     * @param selectSQLTypeParser
+     * @return
+     */
+    public Executor newExecutor(MongoTemplate mongoTemplate, SelectSQLTypeParser selectSQLTypeParser) {
+        Executor executor = new DefaultExecutor(mongoTemplate, selectSQLTypeParser);
+        if (cacheEnabled) {
+            executor = new CachingExecutor(executor, this);
+        }
+        executor = (Executor) interceptorChain.pluginAll(executor);
+        return executor;
+    }
+
 
     /**
      * 添加拦截器
@@ -179,19 +235,13 @@ public class Configuration {
         return cache;
     }
 
-    /**
-     *  创建 SQL 分析器责任链 （被拦截器包裹的）
-     * @return
-     */
-    public Analyzer newAnalyzer() {
-      return new AbstractAnalyzer.Builder()
-                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new JoinAnalyzer()))
-                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new MatchAnalyzer()))
-                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new GroupAnalyzer()))
-                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new HavingAnalyzer()))
-                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new SortAnalyzer()))
-                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new LimitAnalyzer()))
-                .addAnalyzer((Analyzer) interceptorChain.pluginAll(new ProjectAnalyzer()))
-                .build();
+    public CacheManager getCacheManager() {
+        return cacheManager;
     }
+
+    public void setCacheManager(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
+    }
+
+
 }

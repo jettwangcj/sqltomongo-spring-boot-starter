@@ -39,9 +39,10 @@ public class SelectSQLTypeParser {
         data.setMajorTableAlias(SqlCommonUtil.getMajorTableAlias(plain));
         data.setMajorTable(SqlCommonUtil.getMajorTable(plain));
 
-        Stream.of(ParserPartTypeEnum.values()).forEach(item -> {
+        // 并行解析 提高速度
+        Stream.of(ParserPartTypeEnum.values()).parallel().forEach(item -> {
             // 开始解析SQL各个部分
-            configuration.newPartSQLParser(item).proceedData(plain, data);
+            configuration.getPartSQLParserInstance(item).proceedData(plain, data);
         });
         return data;
     }
@@ -51,7 +52,7 @@ public class SelectSQLTypeParser {
         List<AggregationOperation> operations = new ArrayList<>();
 
         // 使用责任链设计模式开始分析 每个部分 SQL 封装 MongoAPI
-        Analyzer analyzer = configuration.newAnalyzer();
+        Analyzer analyzer = Configuration.getAnalyzerInstance();
         analyzer.analysis(operations, data);
 
         Aggregation aggregation = Aggregation.newAggregation(operations);

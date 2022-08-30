@@ -1,9 +1,11 @@
 package com.rrtv.executor;
 
 import com.rrtv.cache.Cache;
+import com.rrtv.cache.CacheManager;
 import com.rrtv.orm.Configuration;
 import com.rrtv.parser.data.LookUpData;
 import com.rrtv.parser.data.PartSQLParserData;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -18,11 +20,14 @@ public class CachingExecutor implements Executor {
     private final Executor delegate;
     private final Configuration configuration;
     private final Cache cache;
+    private final CacheManager cacheManager;
+
 
     public CachingExecutor(Executor delegate, Configuration configuration) {
         this.delegate = delegate;
         this.configuration = configuration;
         this.cache = configuration.getCache();
+        this.cacheManager = configuration.getCacheManager();
     }
 
     @Override
@@ -45,6 +50,13 @@ public class CachingExecutor implements Executor {
 
         T result = delegate.selectOne(returnType, data);
         cache.putObject(cacheKey, result);
+
+        // 设置缓存索引
+        cacheManager.addTableCacheIndex(majorTable, cacheKey);
+        if(!CollectionUtils.isEmpty(joinParser)){
+            joinParser.stream().forEach(item -> cacheManager.addTableCacheIndex(item.getTable(), cacheKey));
+        }
+
         return result;
     }
 

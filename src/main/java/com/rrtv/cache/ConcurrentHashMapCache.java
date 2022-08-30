@@ -1,5 +1,8 @@
 package com.rrtv.cache;
 
+import com.rrtv.util.StringUtils;
+
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -29,7 +32,13 @@ public class ConcurrentHashMapCache implements Cache {
 
     @Override
     public String generateCacheKey(String sql, Class returnType, Object... parameters) {
-        return null;
+        StringBuilder cacheKey = new StringBuilder();
+        cacheKey.append(sql)
+                .append("#")
+                .append(returnType.getName())
+                .append("#")
+                .append(Arrays.toString(parameters));
+        return StringUtils.md5(cacheKey.toString());
     }
 
     @Override
