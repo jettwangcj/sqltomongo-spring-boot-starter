@@ -1,6 +1,7 @@
 package com.rrtv.configure;
 
 import com.rrtv.SQLToMongoTemplate;
+import com.rrtv.cache.ClearCacheListener;
 import com.rrtv.cache.MongoTemplateProxy;
 import com.rrtv.orm.ConfigurationBuilder;
 import com.rrtv.orm.SqlSession;
@@ -31,6 +32,11 @@ public class SqlToMongoAutoConfiguration {
         return new ConfigurationBuilder().build(interceptorConfigurer, properties);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public ClearCacheListener clearCacheListener(@Autowired com.rrtv.orm.Configuration configuration){
+        return new ClearCacheListener(configuration);
+    }
 
     @Bean
     @ConditionalOnMissingBean

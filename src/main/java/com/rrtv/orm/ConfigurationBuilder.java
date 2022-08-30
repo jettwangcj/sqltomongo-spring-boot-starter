@@ -1,5 +1,7 @@
 package com.rrtv.orm;
 
+import com.rrtv.cache.CacheManager;
+import com.rrtv.cache.DefaultCacheManager;
 import com.rrtv.configure.SqlToMongoProperties;
 import com.rrtv.plugin.InterceptorConfigurer;
 import org.dom4j.Document;
@@ -44,6 +46,12 @@ public class ConfigurationBuilder {
         // 设置是否开启缓存
         configuration.setCacheEnabled(properties.isCacheEnabled());
 
+        // 设置缓存管理器
+        if(configuration.isCacheEnabled()){
+            CacheManager cacheManager = new DefaultCacheManager();
+            configuration.setCacheManager(cacheManager);
+            configuration.setCache(cacheManager.createCache(properties.getCacheFullName()));
+        }
         return configuration;
     }
 

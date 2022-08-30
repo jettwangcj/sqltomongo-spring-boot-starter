@@ -1,5 +1,6 @@
 package com.rrtv.cache;
 
+import com.rrtv.orm.Configuration;
 import org.springframework.context.ApplicationListener;
 
 /**
@@ -10,8 +11,18 @@ import org.springframework.context.ApplicationListener;
  */
 public class ClearCacheListener implements ApplicationListener<ClearCacheEvent> {
 
+    private Configuration configuration;
+
+    public ClearCacheListener(Configuration configuration){
+        this.configuration = configuration;
+    }
+
     @Override
     public void onApplicationEvent(ClearCacheEvent clearCacheEvent) {
-
+        CacheManager cacheManager = configuration.getCacheManager();
+        if(cacheManager != null){
+            String collectionName = clearCacheEvent.getCollectionName();
+            cacheManager.clearTableCacheIndex(collectionName);
+        }
     }
 }

@@ -10,8 +10,15 @@ import org.springframework.context.ApplicationEvent;
  */
 public class ClearCacheEvent extends ApplicationEvent {
 
-    public ClearCacheEvent(Object source) {
+    private String collectionName;
+
+    public ClearCacheEvent(Object source, String collectionName) {
         super(source);
+        this.collectionName = collectionName;
+    }
+
+    public String getCollectionName() {
+        return collectionName;
     }
 
 }

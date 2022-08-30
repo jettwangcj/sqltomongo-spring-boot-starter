@@ -19,14 +19,12 @@ import java.util.function.BiFunction;
 public class CachingExecutor implements Executor {
 
     private final Executor delegate;
-    private final Configuration configuration;
     private final Cache cache;
     private final CacheManager cacheManager;
 
 
     public CachingExecutor(Executor delegate, Configuration configuration) {
         this.delegate = delegate;
-        this.configuration = configuration;
         this.cache = configuration.getCache();
         this.cacheManager = configuration.getCacheManager();
     }

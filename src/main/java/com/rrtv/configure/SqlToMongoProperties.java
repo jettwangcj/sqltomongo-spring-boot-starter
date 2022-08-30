@@ -18,5 +18,7 @@ public class SqlToMongoProperties {
 
     private boolean cacheEnabled;
 
+    private String cacheFullName;
+
 
 }

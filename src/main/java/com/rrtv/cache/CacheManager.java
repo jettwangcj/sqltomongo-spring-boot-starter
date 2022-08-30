@@ -1,7 +1,6 @@
 package com.rrtv.cache;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * @Classname CacheManager
@@ -24,7 +23,13 @@ public interface CacheManager {
      * @param table
      * @return
      */
-    Map<String, List<String>> getTableCacheIndex(String table);
+    Set<String> getTableCacheIndex(String table);
+
+    /**
+     *  清除
+     * @param table
+     */
+    void clearTableCacheIndex(String table);
 
     /**
      *  添加缓存索引

@@ -29,7 +29,7 @@ public class MongoTemplateProxy extends MongoTemplate implements ApplicationEven
         UpdateResult updateResult = super.doUpdate(collectionName, query, update, entityClass, upsert, multi);
         if(configuration.isCacheEnabled()){
             // 发布清除缓存事件
-            applicationEventPublisher.publishEvent(new ClearCacheEvent(new Object()));
+            applicationEventPublisher.publishEvent(new ClearCacheEvent(this, collectionName));
         }
         return updateResult;
     }
