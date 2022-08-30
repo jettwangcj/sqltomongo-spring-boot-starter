@@ -23,4 +23,6 @@ public interface Executor {
 
     <T> List<T> selectList(String sql, Class<T> returnType, @Nullable Object... parameters);
 
+    <T> List<T> selectList(Class<T> returnType, PartSQLParserData data);
+
 }

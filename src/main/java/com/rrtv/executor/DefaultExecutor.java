@@ -62,4 +62,13 @@ public class DefaultExecutor implements Executor {
         AggregationResults<T> results = mongoTemplate.aggregate(result.getAggregation(), result.getCollectionName(), returnType);
         return results.getMappedResults();
     }
+
+    @Override
+    public <T> List<T> selectList(Class<T> returnType, PartSQLParserData data) {
+        MongoParserResult result = selectSQLTypeParser.mongoAggregationAnalyzer(data);
+        // 使用 MongoTemplate 的 aggregate 聚合查询 API 获取结果
+        AggregationResults<T> results = mongoTemplate.aggregate(result.getAggregation(),
+                result.getCollectionName(), returnType);
+        return results.getMappedResults();
+    }
 }
