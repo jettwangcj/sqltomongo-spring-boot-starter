@@ -40,12 +40,12 @@ public class DefaultCacheManager implements CacheManager {
 
     @Override
     public Set<String> getTableCacheIndex(String table) {
-        return tableCacheIndexMap.get(table);
+        return tableCacheIndexMap.get(table.toLowerCase());
     }
 
     @Override
     public void clearTableCacheIndex(String table) {
-        Set<String> tableCacheIndex = this.getTableCacheIndex(table);
+        Set<String> tableCacheIndex = this.getTableCacheIndex(table.toUpperCase());
         if(!CollectionUtils.isEmpty(tableCacheIndex)){
             tableCacheIndex.stream().parallel().forEach(item -> this.cache.removeObject(item));
         }
@@ -53,6 +53,7 @@ public class DefaultCacheManager implements CacheManager {
 
     @Override
     public void addTableCacheIndex(String table, String cacheKey) {
+        table = table.toUpperCase();
         Set<String> tableIndex;
         synchronized (table) {
             if(tableCacheIndexMap.containsKey(table)){
