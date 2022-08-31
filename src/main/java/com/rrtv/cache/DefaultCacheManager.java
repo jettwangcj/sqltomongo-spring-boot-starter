@@ -40,7 +40,7 @@ public class DefaultCacheManager implements CacheManager {
 
     @Override
     public Set<String> getTableCacheIndex(String table) {
-        return tableCacheIndexMap.get(table.toLowerCase());
+        return tableCacheIndexMap.get(table.toUpperCase());
     }
 
     @Override
