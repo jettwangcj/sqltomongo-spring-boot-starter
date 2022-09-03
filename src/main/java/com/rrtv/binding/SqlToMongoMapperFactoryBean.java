@@ -17,8 +17,6 @@ public class SqlToMongoMapperFactoryBean<T> implements FactoryBean<T>, Applicati
 
     private Class<T> mapperInterface;
 
-    private ApplicationContext applicationContext;
-
     private SqlSession sqlSession;
 
     public SqlToMongoMapperFactoryBean() {}
@@ -57,7 +55,6 @@ public class SqlToMongoMapperFactoryBean<T> implements FactoryBean<T>, Applicati
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
         this.sqlSession = applicationContext.getBean(SqlSession.class);
     }
 

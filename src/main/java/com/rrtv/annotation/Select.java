@@ -1,4 +1,4 @@
-package com.rrtv.binding;
+package com.rrtv.annotation;
 
 import java.lang.annotation.*;
 

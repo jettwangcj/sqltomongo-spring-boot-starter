@@ -1,16 +1,13 @@
 package com.rrtv.binding;
 
+import com.rrtv.annotation.Select;
 import com.rrtv.orm.Configuration;
 import com.rrtv.orm.XNode;
 import com.rrtv.util.SqlCommonUtil;
 import com.rrtv.util.SqlSupportedSyntaxCheckUtil;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**

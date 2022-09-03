@@ -29,11 +29,6 @@ public class DefaultSqlSession implements SqlSession {
     }
 
     @Override
-    public <T> T getMapper(Class<T> type) {
-        return null;
-    }
-
-    @Override
     public Object execute(String statement, Class returnType, Class actualType, Object... parameters) {
 
         XNode xNode = mapperElement.get(statement);

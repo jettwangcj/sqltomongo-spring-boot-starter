@@ -38,6 +38,8 @@ public class ConfigurationBuilder {
 
         // 构建配置核心对象
         Configuration configuration = new Configuration();
+
+        // 解析 Mapper.xml文件 解析出结果保存  Map<String, XNode> 中
         configuration.setMapperElement(DomParser.parser(list));
 
         // 添加拦截器

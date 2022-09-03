@@ -22,11 +22,35 @@ public class CachingExecutor implements Executor {
     private final Cache cache;
     private final CacheManager cacheManager;
 
-
     public CachingExecutor(Executor delegate, Configuration configuration) {
         this.delegate = delegate;
         this.cache = configuration.getCache();
         this.cacheManager = configuration.getCacheManager();
+    }
+
+    private <T> Object processSelect(String sql, Class<T> returnType, BiFunction<Class<T>, PartSQLParserData, Object> function,
+                                     Object... parameters){
+        // 生成缓存Key
+        String cacheKey = cache.generateCacheKey(sql, returnType, parameters);
+        // 获取缓存
+        Object object = cache.getObject(cacheKey);
+        if(object != null) {
+            return object;
+        }
+        PartSQLParserData data = delegate.sqlParserData(sql, parameters);
+        Object result = function.apply(returnType, data);
+
+        // 设置缓存
+        cache.putObject(cacheKey, result);
+
+        // 设置缓存索引
+        String majorTable = data.getMajorTable();
+        List<LookUpData> joinParser = data.getJoinParser();
+        cacheManager.addTableCacheIndex(majorTable, cacheKey);
+        if(!CollectionUtils.isEmpty(joinParser)){
+            joinParser.stream().forEach(item -> cacheManager.addTableCacheIndex(item.getTable(), cacheKey));
+        }
+        return result;
     }
 
     @Override
@@ -44,26 +68,7 @@ public class CachingExecutor implements Executor {
         return (List<T>) processSelect(sql, returnType, (reType, data) -> delegate.selectList(reType, data), parameters);
     }
 
-    private <T> Object processSelect(String sql, Class<T> returnType, BiFunction<Class<T>, PartSQLParserData, Object> function,  Object... parameters){
-        String cacheKey = cache.generateCacheKey(sql, returnType, parameters);
-        Object object = cache.getObject(cacheKey);
-        if(object != null) {
-            return object;
-        }
-        PartSQLParserData data = delegate.sqlParserData(sql, parameters);
-        Object result = function.apply(returnType, data);
 
-        cache.putObject(cacheKey, result);
-
-        // 设置缓存索引
-        String majorTable = data.getMajorTable();
-        List<LookUpData> joinParser = data.getJoinParser();
-        cacheManager.addTableCacheIndex(majorTable, cacheKey);
-        if(!CollectionUtils.isEmpty(joinParser)){
-            joinParser.stream().forEach(item -> cacheManager.addTableCacheIndex(item.getTable(), cacheKey));
-        }
-        return result;
-    }
 
     @Override
     public <T> List<T> selectList(Class<T> returnType, PartSQLParserData data) {

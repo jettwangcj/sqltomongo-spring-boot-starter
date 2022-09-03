@@ -46,3 +46,108 @@ Mapper代理bean如何更加优雅
 ### 最核心变化，模仿Mybatis，通过拦截器来扩展本工具的核心模块
 
 
+```
+sqltomongo-spring-boot-starter
+└── src
+    └── main
+        └── java
+            ├──com.rrtv
+            │  ├── adapter
+            │  │   └── MatchExpressionVisitorAdapter.java  ------ 解析过滤匹配的 ExpressionVisitorAdapter
+            │  ├── analyzer                                ------ SQL分析器，将SQL解析的元数据封装成 Mongo API 
+            │  │   ├── AbstractAnalyzer.java               
+            │  │   ├── Analyzer.java                       
+            │  │   ├── GroupAnalyzer.java                 
+            │  │   ├── HavingAnalyzer.java                 
+            │  │   ├── JoinAnalyzer.java                  
+            │  │   ├── LimitAnalyzer.java                 
+            │  │   ├── MatchAnalyzer.java                  
+            │  │   ├── ProjectAnalyzer.java              
+            │  │   └── SortAnalyzer.java                   
+            │  ├── annotation
+            │  │   ├── EnableSqlToMongoMapper.java         ------ 启动类注解
+            │  │   ├── Intercepts.java                     ------ 插件注解
+            │  │   ├── Select.java                         ------ 查询注解
+            │  │   ├── Signature.java                      ------ 插件注解
+            │  │   └── SqlToMongoMapper.java               ------ Mapper 接口类注解
+            │  ├── binding                                 ------ 绑定，Mapper接口代理注册Bean
+            │  │   ├── MapperAnnotationBuilder.java        ------ Mapper注解解析，解析 Select 注解
+            │  │   ├── MapperProxy.java                       
+            │  │   ├── MapperProxyFactory.java         
+            │  │   └── SqlToMongoMapperFactoryBean.java         
+            │  ├── cache                                   ------ 缓存相关       
+            │  │   ├── Cache.java         
+            │  │   ├── CacheManager.java                   ------ 缓存管理器
+            │  │   ├── ClearCacheEvent.java                ------ 清除缓存事件
+            │  │   ├── ClearCacheListener.java             ------ 清除缓存监听器
+            │  │   ├── ConcurrentHashMapCache.java         
+            │  │   ├── DefaultCacheManager.java         
+            │  │   ├── MongoTemplateProxy.java         
+            │  │   └── SaveMongoEventListener.java         ------ Mongo 监听器
+            │  ├── common
+            │  │   ├── AggregationFunction.java            ------ 聚合函数枚举
+            │  │   ├── ConversionFunction.java             ------ 转化函数枚举
+            │  │   ├── ParserPartTypeEnum.java        
+            │  │   └── MongoParserResult.java              ------ SQL解析后封装Mongo API 结果
+            │  ├── configure
+            │  │   ├── SqlToMongoAutoConfiguration.java    ------ 自动配置
+            │  │   ├── SqlToMongoMapperFactoryBean.java    ------ SqlToMongoMapper 工厂Bean
+            │  │   └── SqlToMongoRegistrar.java            ------ Mapper 接口 注册 
+            │  ├── exception                               ------ 自定义异常
+            │  │   ├── BindingException.java
+            │  │   ├── NotSupportFunctionException.java
+            │  │   ├── NotSupportSubSelectException.java
+            │  │   ├── PluginException.java
+            │  │   ├── SqlParameterException.java
+            │  │   ├── SqlParserException.java
+            │  │   ├── SqlTypeException.java
+            │  │   └── TableAssociationException.java
+            │  ├── executor                                ------ 具体执行器 
+            │  │   ├── CachingExecutor.java
+            │  │   ├── DefaultExecutor.java
+            │  │   └── Executor.java
+            │  ├── orm
+            │  │   ├── Configuration.java                 ------ 核心配置类，重点
+            │  │   ├── ConfigurationBuilder.java       
+            │  │   ├── DefaultSqlSession.java             ------ SqlSession 实现类
+            │  │   ├── DomParser.java                     ------ Dom 解析  
+            │  │   ├── SqlSession.java
+            │  │   ├── SqlSessionBuilder.java
+            │  │   └── XNode.java                         ------ xml 解析结果封装 
+            │  ├── parser                                 ------ SQL 解析
+            │  │   ├── data                               ------ SQL 各个部分解析结果
+            │  │   │   ├── GroupData.java               
+            │  │   │   ├── LimitData.java
+            │  │   │   ├── LookUpData.java
+            │  │   │   ├── MatchData.java
+            │  │   │   ├── PartSQLParserData.java
+            │  │   │   ├── PartSQLParserResult.java
+            │  │   │   ├── ProjectData.java
+            │  │   │   └── SortData.java
+            │  │   ├── GroupSQLParser.java               ------ 解析 SQL 分组
+            │  │   ├── HavingSQLParser.java              ------ 解析 SQL Having   
+            │  │   ├── JoinSQLParser.java                ------ 解析 SQL 表关联
+            │  │   ├── LimitSQLParser.java               ------ 解析 SQL Limit
+            │  │   ├── PartSQLParser.java                ------ 解析 SQL Limit
+            │  │   ├── OrderSQLParser.java               ------ 解析 SQL 排序
+            │  │   ├── ProjectSQLParser.java             ------ 解析 SQL 查询字段
+            │  │   ├── SelectSQLTypeParser.java          ------ SQL 查询解析器，调用各个解析类解析SQL，并将元数据封装 Mongo 查询API
+            │  │   └── WhereSQLParser.java               ------ 解析 SQL where 条件   
+            │  ├── plugin                                ------ 插件相关，用于扩展
+            │  │   ├── Interceptor.java                  ------ 拦截器接口
+            │  │   ├── InterceptorChain.java             ------ 拦截器链，封装所有拦截器
+            │  │   ├── InterceptorConfigurer.java        ------ 拦截器配置，用于自定义拦截器
+            │  │   ├── InterceptorConfigurerAdapter.java ------ 拦截器配置适配器，默认添加拦截器模板
+            │  │   ├── InterceptorTemplate.java          ------ 拦截器模板
+            │  │   ├── Invocation.java                  
+            │  │   └── Plugin.java                       ------ 插件具体逻辑
+            │  ├── util
+            │  │   ├── SqlCommonUtil.java                ------  SQL 公共 util
+            │  │   ├── SqlParameterSetterUtil.java       ------  SQL 设置参数 util 
+            │  │   ├── SqlSupportedSyntaxCheckUtil.java  ------  SQL 支持语法检查 util 
+            │  │   └── StringUtils.java                
+            │  └── SQLToMongoTemplate.java               ------  用于Mongo 查询的 bean，使用者直接注入该 Bean
+            └── resources
+                └── META-INF
+                    └── spring.factories
+```
