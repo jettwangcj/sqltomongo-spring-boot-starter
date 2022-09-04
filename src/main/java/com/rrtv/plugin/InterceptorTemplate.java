@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public class InterceptorTemplate implements Interceptor {
             return this.interceptExecutor(invocation);
         } else if(target instanceof Analyzer) {
 
-            log.info("----进入 Analyzer 分析器方法--- ");
+            return this.interceptAnalyzer(invocation);
 
         } else {
             PlainSelect plain = (PlainSelect) args[0];
@@ -60,6 +61,10 @@ public class InterceptorTemplate implements Interceptor {
                 return this.interceptWhereSQLParser(plain, data, invocation);
             }
         }
+        return invocation.proceed();
+    }
+
+    private Object interceptAnalyzer(Invocation invocation) throws Exception {
         return invocation.proceed();
     }
 
